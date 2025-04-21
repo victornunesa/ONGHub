@@ -45,4 +45,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function ong()
+    {
+        return $this->belongsTo(Ong::class);
+    }
 }
