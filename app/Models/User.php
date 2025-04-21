@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'ong_id',    // Adicionado
+        'tipo',      // Adicionado
+        'status',    // Adicionado
     ];
 
     /**
@@ -44,5 +47,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Relacionamento com a ONG
+     */
+    public function ong()
+    {
+        return $this->belongsTo(\App\Models\Ong::class);
     }
 }
