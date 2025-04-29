@@ -17,9 +17,9 @@ class OngFactory extends Factory
     public function definition(): array
     {
         return [
-            'nome' => 'ONG 1' ,
-            'cnpj' => fake()->numerify("##############"),
-            'email' => fake()->email(),
+            'nome' => 'ONG ' . fake()->unique()->randomDigit(),
+            'cnpj' => fake()->unique()->numerify("##############"),
+            'email' => fake()->unique()->email(),
             'telefone' => '1234567',
             'endereco' => fake()->address(),
             'status' => 'ativo'

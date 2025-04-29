@@ -20,9 +20,8 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-
-        Ong::factory()
-            ->hasUsuarios(1)
-            ->create();
+        $this->call([
+            OngSeeder::class
+        ]);
     }
 }
