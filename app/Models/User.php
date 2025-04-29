@@ -21,9 +21,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'ong_id',    // Adicionado
-        'tipo',      // Adicionado
-        'status',    // Adicionado
     ];
 
     /**
@@ -49,11 +46,8 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Relacionamento com a ONG
-     */
     public function ong()
     {
-        return $this->belongsTo(\App\Models\Ong::class);
+        return $this->belongsTo(Ong::class);
     }
 }

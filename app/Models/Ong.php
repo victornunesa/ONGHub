@@ -3,45 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Ong extends Model
 {
+    use HasFactory;
+
+    protected $table = 'ong';
+
     protected $fillable = [
         'nome',
         'cnpj',
         'email',
         'telefone',
-        'endereco',
-        'status',
+        'endereco'
     ];
 
-    public function users()
+    public function usuarios()
     {
         return $this->hasMany(User::class);
-    }
-
-    public function relatorios()
-    {
-        return $this->hasMany(Relatorio::class);
-    }
-
-    public function estoques()
-    {
-        return $this->hasMany(Estoque::class);
-    }
-
-    public function pedidosDoacao()
-    {
-        return $this->belongsToMany(PedidoDoacao::class, 'pedido_doacao_ong_pivot');
-    }
-
-    public function doacoesEnviadas()
-    {
-        return $this->hasMany(Doacao::class, 'ong_origem_id');
-    }
-
-    public function doacoesRecebidas()
-    {
-        return $this->hasMany(Doacao::class, 'ong_destino_id');
     }
 }
