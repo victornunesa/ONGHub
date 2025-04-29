@@ -12,6 +12,16 @@ class CreateEstoque extends CreateRecord
 {
     protected static string $resource = EstoqueResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'Estoque criado com sucesso';
+    }
+
     protected function getFormActions(): array
     {
         return [
