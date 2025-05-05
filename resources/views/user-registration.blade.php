@@ -18,6 +18,16 @@
                         <form method="POST" action="{{ route('ong.register') }}">
                             @csrf
 
+                            @if($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
                             <!-- Dados da ONG -->
                             <div class="mb-3">
                                 <label for="nome" class="form-label">Nome da ONG*</label>
