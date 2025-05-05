@@ -57,6 +57,16 @@
                             <div class="mb-3">
                                 <label for="password" class="form-label">Senha*</label>
                                 <input type="password" class="form-control" id="password" name="password" required>
+                                <div class="form-text">
+                                    A senha deve conter:
+                                    <ul class="mb-0">
+                                        <li class="req-min">Mínimo 8 caracteres</li>
+                                        <li class="req-letter">Pelo menos 1 letra</li>
+                                        <li class="req-mixed">Letras maiúsculas e minúsculas</li>
+                                        <li class="req-number">Pelo menos 1 número</li>
+                                        <li class="req-symbol">Pelo menos 1 símbolo especial</li>
+                                    </ul>
+                                </div>
                             </div>
 
                             <div class="mb-3">
