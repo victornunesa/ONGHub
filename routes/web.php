@@ -13,6 +13,20 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('perfil');
+    }
+
+    return view('welcome');
+});
+
+#Rota temporária
+Route::get('/reativar-conta', function () {
+    return 'Página de reativação de conta (em breve)';
+})->name('reativar.conta');
+
+
 Route::get('/cadastro', function () {
     return view('user-registration'); 
 })->name('user.registration');

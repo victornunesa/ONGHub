@@ -8,6 +8,14 @@
 </head>
 <body>
     <div class="container mt-5">
+
+        {{-- Botão no canto superior direito --}}
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ url('/') }}" class="btn btn-outline-secondary">
+                Voltar para Início
+            </a>
+        </div>
+
         <div class="row justify-content-center">
             <div class="col-md-8">
                 <div class="card">
