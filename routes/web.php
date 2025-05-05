@@ -21,10 +21,33 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-#Rota temporária
 Route::get('/reativar-conta', function () {
-    return 'Página de reativação de conta (em breve)';
+    return view('reativar-conta');
 })->name('reativar.conta');
+
+Route::post('/reativar-conta', function () {
+    $credentials = request()->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    $user = \App\Models\User::where('email', $credentials['email'])
+        ->where('status', 'inativo')
+        ->first();
+
+    if (!$user || !\Illuminate\Support\Facades\Hash::check($credentials['password'], $user->password)) {
+        return back()->withErrors(['email' => 'Credenciais inválidas ou conta já está ativa.'])->withInput();
+    }
+
+    \Illuminate\Support\Facades\DB::transaction(function () use ($user) {
+        $user->update(['status' => 'ativo']);
+        $user->ong()->update(['status' => 'ativo']);
+    });
+
+    auth()->login($user);
+
+    return redirect()->route('perfil')->with('success', 'Conta reativada com sucesso!');
+})->name('reativar.conta.processar');
 
 
 Route::get('/cadastro', function () {
