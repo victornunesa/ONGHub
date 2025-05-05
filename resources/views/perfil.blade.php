@@ -59,6 +59,10 @@
                                 Página Inicial
                             </a>
                         </div>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-secondary">Sair</button>
+                        </form>
                     </div>
                 </div>
             </div>

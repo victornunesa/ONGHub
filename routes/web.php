@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
 });
-
 
 Route::get('/cadastro', function () {
     return view('user-registration'); 
@@ -69,6 +69,35 @@ Route::post('/cadastro', function () {
         return back()->withInput()->withErrors(['error' => $e->getMessage()]);
     }
 })->name('ong.register');
+
+Route::get('/login', function () {
+    return view('login');
+})->name('login');
+
+Route::post('/login', function () {
+    $credentials = request()->validate([
+        'email' => 'required|email',
+        'password' => 'required'
+    ]);
+
+    $user = \App\Models\User::where('email', $credentials['email'])->first();
+
+    if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        return back()->withErrors(['email' => 'Credenciais inválidas.']);
+    }
+
+    if ($user->status !== 'ativo') {
+        return back()->withErrors(['email' => 'Sua conta está inativa.']);
+    }
+
+    Auth::login($user);
+    return redirect()->route('perfil');
+});
+
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/login');
+})->name('logout');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/perfil', function () {
@@ -141,6 +170,33 @@ Route::middleware(['auth'])->group(function () {
     
         return redirect()->route('perfil')->with('success', 'Perfil atualizado com sucesso!');
     })->name('perfil.atualizar');
+
+    Route::delete('/perfil/deletar', function () {
+        $user = auth()->user();
+    
+        DB::transaction(function () use ($user) {
+            $user->delete();        // Deleta o próprio usuário
+            $user->ong()->delete(); // Deleta a ONG associada
+        });
+    
+        auth()->logout();
+    
+        return redirect('/')->with('success', 'Conta excluída com sucesso.');
+    })->name('perfil.deletar');
+
+    Route::patch('/perfil/inativar', function () {
+        $user = auth()->user();
+    
+        DB::transaction(function () use ($user) {
+            $user->update(['status' => 'inativo']);
+            $user->ong()->update(['status' => 'inativo']);
+        });
+    
+        auth()->logout();
+    
+        return redirect('/')->with('success', 'Sua conta foi inativada com sucesso.');
+    })->name('perfil.inativar');
+    
     
 });
 

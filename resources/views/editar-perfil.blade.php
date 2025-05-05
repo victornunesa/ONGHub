@@ -102,6 +102,34 @@
                                 </button>
                             </div>
                         </form>
+
+                        <hr class="my-4">
+
+                        <div class="mt-5">
+                            <h5>Inativar Conta</h5>
+                            <p class="text-muted">Sua conta será desativada e você não poderá mais acessar até que seja reativada por um administrador.</p>
+
+                            <form action="{{ route('perfil.inativar') }}" method="POST" onsubmit="return confirm('Deseja realmente inativar sua conta? Você será desconectado(a).');">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit" class="btn btn-outline-warning">
+                                    Inativar Conta
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="mt-5">
+                            <h5>Encerrar Conta</h5>
+                            <p class="text-muted">Você pode excluir permanentemente sua conta. Esta ação não pode ser desfeita.</p>
+
+                            <form action="{{ route('perfil.deletar') }}" method="POST" onsubmit="return confirm('Tem certeza que deseja excluir sua conta? Esta ação é irreversível.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">
+                                    Excluir Conta
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
