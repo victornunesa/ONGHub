@@ -65,7 +65,7 @@ class PedidoDoacaoResource extends Resource
                 ->icon('heroicon-m-hand-thumb-up')
                 ->visible(fn ($record) => $record->status !== 'Doação completa')
                 ->fillForm(fn ($record) => [
-                    'quantidade_solicitada' => $record->quantidade,
+                    'quantidade_solicitada_pedido' => $record->quantidade,
                 ])
                 ->record(fn ($record) => $record)
                 ->form([
@@ -74,47 +74,45 @@ class PedidoDoacaoResource extends Resource
                         ->options(fn () =>
                             Estoque::all()->pluck('nome_item', 'id')
                         )
+                        ->required()
+                        ->reactive(),
+
+                    TextInput::make('quantidade_solicitada_pedido')
+                        ->default(fn ($record) => $record->quantidade)
+                        ->hidden()
+                        ->dehydrated() // necessário para enviar o valor junto
                         ->required(),
 
-                    TextInput::make('quantidade_solicitada')
-                        ->label('Quantidade Solicitada')
-                        ->disabled() // apenas visual
-                        ->dehydrated(false), // não envia para o backend de novo
-
                     TextInput::make('quantidade')
-                        ->label('Quantidade a doar')
                         ->numeric()
                         ->required()
-                        ->minValue(1),
+                        ->label('Quantidade a doar')
+                        ->minValue(1)
+                        ->rule(function (Get $get) {
+                            $estoqueId = $get('estoque_id');
+                            $estoque = Estoque::find($estoqueId);
+                            $quantidadeEstoque = $estoque?->estoque_real ?? 0;
+
+                            $quantidadeSolicitada = $get('quantidade_solicitada_pedido') ?? 0;
+
+                            $limite = min($quantidadeEstoque, $quantidadeSolicitada);
+
+                            return 'max:' . $limite;
+                        })
+                        ->helperText(function (Get $get) {
+                            $estoqueId = $get('estoque_id');
+                            $estoque = Estoque::find($estoqueId);
+                            $estoqueQtd = $estoque?->estoque_real ?? 0;
+
+                            $pedidoQtd = $get('quantidade_solicitada_pedido') ?? 0;
+
+                            return 'Máximo permitido: ' . min($estoqueQtd, $pedidoQtd)
+                                . ' (Pedido: ' . $pedidoQtd
+                                . ', Estoque: ' . $estoqueQtd . ')';
+                        }),
                 ])
                 ->action(function ($record, array $data) {
                     $estoque = Estoque::find($data['estoque_id']);
-
-                    if (!$estoque) {
-                        Notification::make()
-                            ->title('Item de estoque inválido')
-                            ->danger()
-                            ->send();
-                        return;
-                    }
-
-                    if ($data['quantidade'] > $estoque->quantidade) {
-                        Notification::make()
-                            ->title('Estoque insuficiente')
-                            ->body('Disponível: ' . $estoque->quantidade)
-                            ->danger()
-                            ->send();
-                        return;
-                    }
-
-                    if ($data['quantidade'] > $record->quantidade) {
-                        Notification::make()
-                            ->title('Quantidade excede o pedido')
-                            ->body('O pedido exige no máximo ' . $record->quantidade)
-                            ->danger()
-                            ->send();
-                        return;
-                    }
 
                     // Atualiza status do pedido
                     if ($data['quantidade'] == $record->quantidade) {
@@ -122,6 +120,9 @@ class PedidoDoacaoResource extends Resource
                     } else {
                         $record->update(['status' => 'Doação em parte']);
                     }
+
+                    $estoque->quantidade_solicitada += $data['quantidade'];
+                    $estoque->save();
 
                     Notification::make()
                         ->title('Doação registrada com sucesso')
