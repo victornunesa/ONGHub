@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'tipo',
+        'status',
+        'ong_id'
     ];
 
     /**
@@ -51,3 +54,4 @@ class User extends Authenticatable
         return $this->belongsTo(Ong::class);
     }
 }
+

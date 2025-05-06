@@ -16,7 +16,8 @@ class Ong extends Model
         'cnpj',
         'email',
         'telefone',
-        'endereco'
+        'endereco',
+        'status'
     ];
 
     public function usuarios()
