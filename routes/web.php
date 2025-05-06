@@ -15,7 +15,7 @@ Route::get('/', function () {
 
 Route::get('/', function () {
     if (auth()->check()) {
-        return redirect()->route('perfil');
+        return redirect('/admin');
     }
 
     return view('welcome');
@@ -51,7 +51,7 @@ Route::post('/reativar-conta', function () {
 
 
 Route::get('/cadastro', function () {
-    return view('user-registration'); 
+    return view('user-registration');
 })->name('user.registration');
 
 Route::post('/cadastro', function () {
@@ -140,7 +140,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/perfil', function () {
         $user = auth()->user();
         $ong = $user->ong; // Carrega os dados da ONG associada
-        
+
         return view('perfil', compact('user', 'ong'));
     })->name('perfil');
 
@@ -155,7 +155,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/perfil/atualizar', function () {
         $user = auth()->user();
         $ong = $user->ong;
-    
+
         $validated = request()->validate([
             'nome' => 'required|string|max:100',
             'cnpj' => 'required|string|max:20|unique:ong,cnpj,'.$ong->id,
@@ -189,52 +189,52 @@ Route::middleware(['auth'])->group(function () {
                     ->symbols()
             ],
         ]);
-    
+
         DB::transaction(function () use ($validated, $user, $ong) {
             // Atualiza a ONG
             $ong->update($validated);
-            
+
             // Atualiza o usuário com os mesmos dados relevantes
             $user->update([
                 'name' => $validated['nome'],  // Atualiza o nome no usuário
                 'email' => $validated['email'], // Atualiza o email no usuário
                 // Atualiza a senha se for fornecida
-                'password' => isset($validated['new_password']) 
+                'password' => isset($validated['new_password'])
                 ? Hash::make($validated['new_password'])
                 : $user->password
             ]);
         });
-    
+
         return redirect()->route('perfil')->with('success', 'Perfil atualizado com sucesso!');
     })->name('perfil.atualizar');
 
     Route::delete('/perfil/deletar', function () {
         $user = auth()->user();
-    
+
         DB::transaction(function () use ($user) {
             $user->delete();        // Deleta o próprio usuário
             $user->ong()->delete(); // Deleta a ONG associada
         });
-    
+
         auth()->logout();
-    
+
         return redirect('/')->with('success', 'Conta excluída com sucesso.');
     })->name('perfil.deletar');
 
     Route::patch('/perfil/inativar', function () {
         $user = auth()->user();
-    
+
         DB::transaction(function () use ($user) {
             $user->update(['status' => 'inativo']);
             $user->ong()->update(['status' => 'inativo']);
         });
-    
+
         auth()->logout();
-    
+
         return redirect('/')->with('success', 'Sua conta foi inativada com sucesso.');
     })->name('perfil.inativar');
-    
-    
+
+
 });
 
 
