@@ -10,7 +10,7 @@ class PedidoDoacao extends Model
 
     protected $fillable = [
         'nome_solicitante', 'email_solicitante', 'telefone_solicitante',
-        'descricao', 'quantidade', 'status', 'data_pedido'
+        'descricao', 'quantidade', 'status', 'data_pedido', 'tipo'
     ];
 
 }

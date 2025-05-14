@@ -40,6 +40,7 @@ class PedidoDoacaoResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('nome_solicitante')->searchable(),
+                TextColumn::make('tipo')->searchable(),
                 TextColumn::make('quantidade'),
                 TextColumn::make('status')
                 ->color(fn (string $state): string => match ($state) {
