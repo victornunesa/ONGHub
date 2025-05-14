@@ -163,12 +163,18 @@ Route::post('/doacao', function () {
     ];
 
     foreach ($validated['itens'] as $item) {
-        \App\Models\PedidoDoacao::create(array_merge($dadosPessoais, [
-            'descricao' => $item['descricao'],
-            'quantidade' => $item['quantidade'],
-            'unidade' => $item['unidade'] // Adicione este campo na migration
-        ]));
-    }
+    \App\Models\PedidoDoacao::create([
+        'nome_solicitante' => $validated['nome_solicitante'],
+        'email_solicitante' => $validated['email_solicitante'],
+        'telefone_solicitante' => $validated['telefone_solicitante'],
+        'tipo' => 'Alimentos',
+        'status' => 'Registrada',
+        'data_pedido' => now(),
+        'descricao' => $item['descricao'],
+        'quantidade' => $item['quantidade'],
+        'unidade' => $item['unidade'] // Garantindo que pegue a unidade do item
+    ]);
+}
 
     return redirect('/')->with('success', 'Doação registrada!');
 })->name('doacao.store');
