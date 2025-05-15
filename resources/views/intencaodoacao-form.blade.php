@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Formulário de Doação</title>
+    <title>Formulário de Intenção de Doação</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .item-doacao {
@@ -30,10 +30,10 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header bg-warning text-white">
-                        <h4 class="mb-0">Formulário de Doação de Alimentos</h4>
+                        <h4 class="mb-0">Formulário de Intenção de Doação de Alimentos</h4>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('doacao.store') }}" method="POST" id="formDoacao">
+                        <form action="{{ route('intencao.store') }}" method="POST" id="formDoacao">
                             @csrf
                             
                             <h5 class="mb-4">Dados Pessoais</h5>
@@ -54,7 +54,7 @@
 
                             <hr class="my-4">
                             
-                            <h5 class="mb-4">Itens para Doação</h5>
+                            <h5 class="mb-4">Itens a serem doados</h5>
                             <div id="itens-container">
                                 <!-- Primeiro item -->
                                 <div class="item-doacao">
@@ -95,7 +95,7 @@
                             </button>
                             
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-warning btn-lg">Confirmar intenção de doação</button>
+                                <button type="submit" class="btn btn-warning btn-lg">Confirmar solicitação</button>
                                 <a href="{{ url('/') }}" class="btn btn-outline-secondary">Cancelar</a>
                             </div>
                         </form>

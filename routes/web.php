@@ -138,8 +138,8 @@ Route::post('/logout', function () {
 
 // Adicione esta rota com as outras rotas GET
 Route::get('/doacao', function () {
-    return view('doacao-form');
-})->name('doacao.create');
+    return view('pedidodoacao-form');
+})->name('pedidodoacao.create');
 
 // Adicione esta rota para processar o formulário
 Route::post('/doacao', function () {
@@ -178,6 +178,49 @@ Route::post('/doacao', function () {
 
     return redirect('/')->with('success', 'Doação registrada!');
 })->name('doacao.store');
+
+// Rota para exibir o formulário
+Route::get('/intencao-doacao', function () {
+    return view('intencaodoacao-form');
+})->name('intencaodoacao.create');
+
+// Rota para processar o formulário
+Route::post('/intencao-doacao', function () {
+    $validated = request()->validate([
+        'nome_solicitante' => 'required|string|max:100',
+        'email_solicitante' => 'required|email|max:100',
+        'telefone_solicitante' => 'required|string|max:15',
+        'itens' => 'required|array|min:1',
+        'itens.*.descricao' => 'required|string|max:255',
+        'itens.*.quantidade' => 'required|numeric|min:0.1', // Permite valores decimais
+        'itens.*.unidade' => 'required|string|in:kg,g,L,ml,un,cx,pct,lata,saca,dz,band,fardo,vidro',
+    ]);
+
+    $dadosPessoais = [
+        'nome_solicitante' => $validated['nome_solicitante'],
+        'email_solicitante' => $validated['email_solicitante'],
+        'telefone_solicitante' => $validated['telefone_solicitante'],
+        'tipo' => 'Alimentos',
+        'status' => 'Registrada',
+        'data_pedido' => now(),
+    ];
+
+    foreach ($validated['itens'] as $item) {
+    \App\Models\IntencaoDoacao::create([
+        'nome_solicitante' => $validated['nome_solicitante'],
+        'email_solicitante' => $validated['email_solicitante'],
+        'telefone_solicitante' => $validated['telefone_solicitante'],
+        'tipo' => 'Alimentos',
+        'status' => 'Registrada',
+        'data_pedido' => now(),
+        'descricao' => $item['descricao'],
+        'quantidade' => $item['quantidade'],
+        'unidade' => $item['unidade'] // Garantindo que pegue a unidade do item
+    ]);
+}
+
+    return redirect('/')->with('success', 'Sua intenção foi registrada!');
+})->name('intencao.store');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/perfil', function () {

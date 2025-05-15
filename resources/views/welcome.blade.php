@@ -16,8 +16,8 @@
             <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Login</a>
             <a href="{{ route('user.registration') }}" class="btn btn-success btn-lg">Cadastrar ONG</a>
             <a href="{{ route('reativar.conta') }}" class="btn btn-outline-secondary btn-lg">Reativar Conta</a>
-            <!-- Novo botão para doação -->
-            <a href="{{ route('doacao.create') }}" class="btn btn-warning btn-lg">Quero Doar</a>
+            <a href="{{ route('intencaodoacao.create') }}" class="btn btn-warning btn-lg">Quero doar</a>
+            <a href="{{ route('pedidodoacao.create') }}" class="btn btn-danger btn-lg">Solicitar doação</a>
         </div>
     </div>
 
