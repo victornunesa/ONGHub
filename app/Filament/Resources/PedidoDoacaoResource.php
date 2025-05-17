@@ -41,10 +41,12 @@ class PedidoDoacaoResource extends Resource
             ->columns([
                 TextColumn::make('nome_solicitante')->searchable(),
                 TextColumn::make('tipo')->searchable(),
-                TextColumn::make('quantidade'),
+                TextColumn::make('quantidade')
+                    ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
+                    ->label('Quantidade'),
                 TextColumn::make('status')
                 ->color(fn (string $state): string => match ($state) {
-                    'Doação em aberto' => 'warning',
+                    'Registrada' => 'warning', //'Doação em aberto'
                     'Doação em parte' => 'gray',
                     'Doação completa' => 'success'
                 })

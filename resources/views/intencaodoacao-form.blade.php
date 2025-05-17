@@ -95,7 +95,7 @@
                             </button>
                             
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-warning btn-lg">Confirmar solicitação</button>
+                                <button type="submit" class="btn btn-warning btn-lg">Registrar intenção de doação</button>
                                 <a href="{{ url('/') }}" class="btn btn-outline-secondary">Cancelar</a>
                             </div>
                         </form>

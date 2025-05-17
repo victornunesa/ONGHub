@@ -16,6 +16,12 @@ class IntencaoDoacao extends Model
         'quantidade',
         'unidade',
         'status',
-        'data_pedido'
+        'data_pedido',
+        'ong_id' // Adicione este campo
     ];
+
+    public function ong()
+    {
+        return $this->belongsTo(Ong::class);
+    }
 }
