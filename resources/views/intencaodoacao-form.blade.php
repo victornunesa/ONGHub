@@ -17,6 +17,18 @@
             cursor: pointer;
             color: #dc3545;
         }
+        .ong-card {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .ong-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .ong-card.selected {
+            border: 2px solid #ffc107;
+            background-color: #fff8e1;
+        }
     </style>
 </head>
 <body>
@@ -27,7 +39,7 @@
     @endif
     <div class="container py-5">
         <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-md-10">
                 <div class="card">
                     <div class="card-header bg-warning text-white">
                         <h4 class="mb-0">Formulário de Intenção de Doação de Alimentos</h4>
@@ -52,6 +64,28 @@
                                 <input type="tel" class="form-control" id="telefone_solicitante" name="telefone_solicitante" required>
                             </div>
 
+                            <hr class="my-4">
+                            
+                            <h5 class="mb-4">Selecione a ONG para doação</h5>
+                            <div class="row mb-4" id="ongs-container">
+                                @foreach($ongs as $ong)
+                                <div class="col-md-6 mb-3">
+                                    <div class="card ong-card" data-ong-id="{{ $ong->id }}">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ $ong->nome }}</h5>
+                                            <p class="card-text">
+                                                <strong>CNPJ:</strong> {{ $ong->cnpj }}<br>
+                                                <strong>Email:</strong> {{ $ong->email }}<br>
+                                                <strong>Telefone:</strong> {{ $ong->telefone }}<br>
+                                                <strong>Endereço:</strong> {{ $ong->endereco }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                            <input type="hidden" name="ong_desejada" id="ong_desejada" required>
+                            
                             <hr class="my-4">
                             
                             <h5 class="mb-4">Itens a serem doados</h5>
@@ -110,13 +144,37 @@
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('itens-container');
             const addButton = document.getElementById('adicionar-item');
+            const ongCards = document.querySelectorAll('.ong-card');
+            const ongDesejadaInput = document.getElementById('ong_desejada');
             let itemCount = 1;
+
+            // Seleção de ONG
+            ongCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove a seleção de todas as ONGs
+                    ongCards.forEach(c => c.classList.remove('selected'));
+                    
+                    // Adiciona seleção à ONG clicada
+                    this.classList.add('selected');
+                    
+                    // Define o valor do input hidden
+                    ongDesejadaInput.value = this.dataset.ongId;
+                });
+            });
+
+            // Validação do formulário - verifica se uma ONG foi selecionada
+            document.getElementById('formDoacao').addEventListener('submit', function(e) {
+                if (!ongDesejadaInput.value) {
+                    e.preventDefault();
+                    alert('Por favor, selecione uma ONG para a doação.');
+                    return false;
+                }
+            });
 
             // Adicionar novo item
             addButton.addEventListener('click', function() {
                 const newItem = document.createElement('div');
                 newItem.className = 'item-doacao';
-                // No evento de adicionar item:
                 newItem.innerHTML = `
                     <div class="row">
                         <div class="col-md-5 mb-3">

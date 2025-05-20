@@ -38,6 +38,10 @@ class IntencaoDoacaoResource extends Resource
                 TextColumn::make('nome_solicitante')
                     ->label('Doador')
                     ->searchable(),
+
+                TextColumn::make('email_solicitante')
+                    ->label('E-mail')
+                    ->searchable(),
                     
                 TextColumn::make('descricao')
                     ->label('Item')
@@ -143,5 +147,20 @@ class IntencaoDoacaoResource extends Resource
             'create' => Pages\CreateIntencaoDoacao::route('/create'),
             'edit' => Pages\EditIntencaoDoacao::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        // Verifica se o usuário está autenticado e tem uma ONG associada
+        if (auth()->check() && auth()->user()->ong) {
+            $query->where('ong_desejada', auth()->user()->ong->id);
+        } else {
+            // Se não houver ONG associada, não mostra nada
+            $query->whereNull('id');
+        }
+        
+        return $query;
     }
 }
