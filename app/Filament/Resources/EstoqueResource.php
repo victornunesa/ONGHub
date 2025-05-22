@@ -67,6 +67,12 @@ class EstoqueResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('ong_id', auth()->user()->ong->id);
+    }
+
     public static function getPages(): array
     {
         return [

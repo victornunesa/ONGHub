@@ -18,7 +18,9 @@ class Doacao extends Model
         'quantidade',
         'unidade',
         'data_doacao',
-        'status'
+        'status',
+        'ong_destino_id', // Obrigatório para doações recebidas
+        'ong_origem_id',
     ];
 
     public function intencao()
@@ -29,5 +31,10 @@ class Doacao extends Model
     public function pedido()
     {
         return $this->belongsTo(PedidoDoacao::class, 'pedido_id');
+    }
+
+    public function ongDestino()
+    {
+        return $this->belongsTo(Ong::class, 'ong_destino_id');
     }
 }
