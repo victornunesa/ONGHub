@@ -4,24 +4,24 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\IntencaoDoacaoResource\Pages;
 use App\Filament\Resources\IntencaoDoacaoResource\RelationManagers;
+use App\Models\Doacao;
 use App\Models\Estoque;
 use App\Models\IntencaoDoacao;
 use App\Models\Ong;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Auth;
 
 class IntencaoDoacaoResource extends Resource
 {
     protected static ?string $model = IntencaoDoacao::class;
-
     protected static ?string $navigationIcon = 'heroicon-o-heart';
 
     public static function form(Form $form): Form
@@ -78,6 +78,7 @@ class IntencaoDoacaoResource extends Resource
                         Forms\Components\TextInput::make('quantidade_recebida')
                             ->label('Quantidade Recebida')
                             ->numeric()
+                            ->minValue(0.1)
                             ->default(fn ($record) => $record->quantidade)
                             ->required(),
                             
@@ -91,39 +92,73 @@ class IntencaoDoacaoResource extends Resource
                             ])
                             ->default(fn ($record) => $record->unidade)
                             ->required(),
-                            
                     ])
                     ->action(function ($record, array $data) {
-                        $ongId = auth()->user()->ong->id;
-                        
-                        // Verifica se o item já existe no estoque
-                        $itemEstoque = Estoque::firstOrNew([
-                            'ong_id' => $ongId,
-                            'nome_item' => $record->descricao,
-                            'unidade' => $data['unidade_recebida']
-                        ]);
-                        
-                        // Atualiza a quantidade
-                        $itemEstoque->quantidade += $data['quantidade_recebida'];
-                        $itemEstoque->quantidade_solicitada = 0;
-                        $itemEstoque->data_atualizacao = now();
-                        $itemEstoque->save();
-                        
-                        // Atualiza o status
-                        $record->update([
-                            'status' => 'Recebida',
-                            'quantidade' => $data['quantidade_recebida'],
-                            'unidade' => $data['unidade_recebida']
-                        ]);
-                        
-                        Notification::make()
-                            ->title('Doação registrada com sucesso!')
-                            ->success()
-                            ->send();
+                        \DB::transaction(function () use ($record, $data) {
+                            // Verifica se já existe registro para esta intenção
+                            if (Doacao::where('intencao_id', $record->id)->exists()) {
+                                Notification::make()
+                                    ->title('Atenção')
+                                    ->body('Esta doação já foi registrada anteriormente')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            try {
+                                // 1. Registrar a movimentação na tabela doacao
+                                Doacao::create([
+                                    'intencao_id' => $record->id,
+                                    'nome_doador' => $record->nome_solicitante,
+                                    'email_doador' => $record->email_solicitante,
+                                    'telefone_doador' => $record->telefone_solicitante,
+                                    'descricao' => $record->descricao,
+                                    'quantidade' => $data['quantidade_recebida'],
+                                    'unidade' => $data['unidade_recebida'],
+                                    'data_doacao' => now(),
+                                    'status' => 'Entrada',
+                                    'ong_destino_id' => auth()->user()->ong->id,
+                                    'ong_origem_id' => null
+                                ]);
+
+                                // 2. Atualizar o estoque
+                                $itemEstoque = Estoque::firstOrNew([
+                                    'ong_id' => auth()->user()->ong->id,
+                                    'nome_item' => $record->descricao,
+                                    'unidade' => $data['unidade_recebida']
+                                ]);
+                                
+                                $itemEstoque->quantidade += $data['quantidade_recebida'];
+                                $itemEstoque->data_atualizacao = now();
+                                $itemEstoque->save();
+
+                                // 3. Atualizar a intenção de doação
+                                $record->update([
+                                    'status' => 'Recebida',
+                                    'quantidade' => $data['quantidade_recebida'],
+                                    'unidade' => $data['unidade_recebida']
+                                ]);
+                                
+                                Notification::make()
+                                    ->title('Doação registrada com sucesso!')
+                                    ->body('Estoque atualizado e movimentação registrada.')
+                                    ->success()
+                                    ->send();
+                                    
+                            } catch (\Exception $e) {
+                                Notification::make()
+                                    ->title('Erro ao registrar doação')
+                                    ->body($e->getMessage())
+                                    ->danger()
+                                    ->send();
+                                throw $e;
+                            }
+                        });
                     })
                     ->modalWidth('md')
                     ->modalHeading(fn ($record) => 'Receber: ' . $record->descricao)
-                    ->modalDescription('Confirme os detalhes da doação física recebida')
+                    ->modalDescription('Confirme os detalhes da doação recebida')
+                    ->after(fn () => \Filament\Actions\Action::make('redirect')->url(IntencaoDoacaoResource::getUrl('index')))
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -131,7 +166,6 @@ class IntencaoDoacaoResource extends Resource
                 ]),
             ]);
     }
-
 
     public static function getRelations(): array
     {
@@ -153,11 +187,9 @@ class IntencaoDoacaoResource extends Resource
     {
         $query = parent::getEloquentQuery();
         
-        // Verifica se o usuário está autenticado e tem uma ONG associada
         if (auth()->check() && auth()->user()->ong) {
             $query->where('ong_desejada', auth()->user()->ong->id);
         } else {
-            // Se não houver ONG associada, não mostra nada
             $query->whereNull('id');
         }
         

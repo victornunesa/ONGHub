@@ -17,4 +17,8 @@ class PedidoDoacao extends Model
         'descricao', 'quantidade', 'status', 'data_pedido', 'tipo', 'unidade'
     ];
 
+    public function doacoes()
+    {
+        return $this->hasMany(Doacao::class, 'pedido_id');
+    }
 }

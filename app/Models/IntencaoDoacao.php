@@ -18,4 +18,9 @@ class IntencaoDoacao extends Model
     {
         return $this->belongsTo(Ong::class, 'ong_desejada');
     }
+
+    public function doacoes()
+    {
+        return $this->hasMany(Doacao::class, 'intencao_id');
+    }
 }
