@@ -17,6 +17,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Facades\Filament;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -24,6 +25,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->brandName('ONGHub')
+            //->brandLogo(asset('images/logo.png'))
             ->id('admin')
             ->path('admin')
             ->login()
@@ -54,5 +57,14 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    public function boot(): void
+    {
+        Filament::serving(function () {
+            Filament::registerRenderHook('panels::brand', fn () => '
+                <img src="' . asset('images/logo.png') . '" alt="ONGHub" style="height: 100px;">
+            ');
+        });
     }
 }
