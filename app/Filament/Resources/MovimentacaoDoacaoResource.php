@@ -14,6 +14,10 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Carbon\Carbon;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column;
+use Maatwebsite\Excel\Excel;
 
 class MovimentacaoDoacaoResource extends Resource
 {
@@ -75,22 +79,61 @@ class MovimentacaoDoacaoResource extends Resource
                         if (!empty($data['data_inicio'])) {
                             $query->whereDate('data_doacao', '>=', Carbon::parse($data['data_inicio'])->format('Y-m-d'));
                         }
-
                         if (!empty($data['data_fim'])) {
                             $query->whereDate('data_doacao', '<=', Carbon::parse($data['data_fim'])->format('Y-m-d'));
                         }
-
                         return $query;
                     }),
             ])
-            //->actions([
-              //  Tables\Actions\ViewAction::make(),
-            //])
             ->headerActions([
-                // Sem ações no header por enquanto
+                ExportAction::make('exportar')
+                    ->label('Exportar CSV/XLSX')
+                    ->exports([
+                        ExcelExport::make()
+                            ->withColumns([
+                                Column::make('created_at')->heading('Data/Hora'),
+                                Column::make('descricao')->heading('Item'),
+                                Column::make('quantidade')
+                                    ->heading('Quantidade')
+                                    ->formatStateUsing(fn ($record) => $record->quantidade . ' ' . $record->unidade),
+                                Column::make('status')->heading('Operação'),
+                                Column::make('data_doacao')->heading('Data Doação'),
+                            ])
+                            ->askForFilename()
+                            ->askForWriterType(
+                                default: Excel::XLSX,
+                                options: [
+                                    Excel::CSV => 'CSV',
+                                    Excel::XLSX => 'XLSX',
+                                ]
+                            )
+                            ->modifyQueryUsing(function ($query, $livewire) {
+                                // Filtra só registros da ONG logada
+                                $query->where(function ($q) {
+                                    $q->where('ong_destino_id', auth()->user()->ong->id)
+                                    ->orWhere('ong_origem_id', auth()->user()->ong->id);
+                                });
+
+                                // Pega filtros ativos da tabela
+                                $filters = method_exists($livewire, 'getFilters') ? $livewire->getFilters() : [];
+
+                                if (!empty($filters['status'])) {
+                                    $query->where('status', $filters['status']);
+                                }
+
+                                if (!empty($filters['periodo']['data_inicio'])) {
+                                    $query->whereDate('data_doacao', '>=', Carbon::parse($filters['periodo']['data_inicio'])->format('Y-m-d'));
+                                }
+                                if (!empty($filters['periodo']['data_fim'])) {
+                                    $query->whereDate('data_doacao', '<=', Carbon::parse($filters['periodo']['data_fim'])->format('Y-m-d'));
+                                }
+
+                                return $query;
+                            }),
+                    ]),
             ])
             ->bulkActions([
-                // Sem bulk actions por enquanto
+                // Se quiser exportar em massa
             ]);
     }
 

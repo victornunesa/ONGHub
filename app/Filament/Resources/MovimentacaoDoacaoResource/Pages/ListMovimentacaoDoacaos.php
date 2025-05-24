@@ -16,4 +16,14 @@ class ListMovimentacaoDoacaos extends ListRecords
             // Actions\CreateAction::make(), // Remova se não quiser criar registros
         ];
     }
+
+    public function getTableFilters(): array
+    {
+        return $this->getFilters();
+    }
+
+
+
+
+
 }
