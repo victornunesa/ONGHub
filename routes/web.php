@@ -129,7 +129,7 @@ Route::post('/login', function () {
     }
 
     Auth::login($user);
-    return redirect()->route('perfil');
+    return redirect('/admin');
 });
 
 Route::post('/logout', function () {

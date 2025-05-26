@@ -23,6 +23,8 @@ class IntencaoDoacaoResource extends Resource
 {
     protected static ?string $model = IntencaoDoacao::class;
     protected static ?string $navigationIcon = 'heroicon-o-heart';
+    protected static ?string $modelLabel = 'Intenções';
+    protected static ?string $navigationLabel = 'Intenções de doação';
 
     public static function form(Form $form): Form
     {

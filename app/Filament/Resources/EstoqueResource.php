@@ -35,6 +35,11 @@ class EstoqueResource extends Resource
                     'ml' => 'Mililitros',
                     'l' => 'Litro'
                 ])->native(false)->required(),
+
+                // Campos para o doador
+                TextInput::make('nome_doador')->label('Nome do doador')->required()->maxLength(100),
+                TextInput::make('email_doador')->label('Email do doador')->email()->maxLength(150),
+                TextInput::make('telefone_doador')->label('Telefone do doador')->maxLength(15),
             ]);
     }
 

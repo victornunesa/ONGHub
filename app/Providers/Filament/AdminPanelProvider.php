@@ -18,6 +18,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Facades\Filament;
+use Filament\Navigation\NavigationItem;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -36,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                //Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -65,6 +66,16 @@ class AdminPanelProvider extends PanelProvider
             Filament::registerRenderHook('panels::brand', fn () => '
                 <img src="' . asset('images/logo.png') . '" alt="ONGHub" style="height: 100px;">
             ');
+
+            // Aqui registramos o item do menu lateral
+            Filament::registerNavigationItems([
+                \Filament\Navigation\NavigationItem::make('Meu Perfil')
+                    ->url('/perfil')
+                    ->icon('heroicon-o-user-circle')
+                    ->group('Conta')
+                    ->sort(0),
+            ]);
         });
+
     }
 }

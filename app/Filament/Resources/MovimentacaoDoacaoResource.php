@@ -24,7 +24,7 @@ class MovimentacaoDoacaoResource extends Resource
     protected static ?string $model = Doacao::class;
     protected static ?string $navigationIcon = 'heroicon-o-arrow-trending-up';
     protected static ?string $navigationLabel = 'Movimentações';
-    protected static ?string $modelLabel = 'Movimentação';
+    protected static ?string $modelLabel = 'Movimentações';
 
     public static function form(Form $form): Form
     {

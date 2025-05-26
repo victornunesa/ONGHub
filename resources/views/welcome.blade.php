@@ -4,23 +4,25 @@
     <meta charset="UTF-8">
     <title>Bem-vindo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">-->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-900">
 
-    <div class="container text-center mt-5">
-        <h1 class="mb-4">Bem-vindo ao ONGHub</h1>
-        <p class="lead mb-5">Acesse ou cadastre sua ONG para começar.</p>
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-10 rounded shadow max-w-md w-full text-center">
+            <h1 class="text-3xl font-bold mb-4">Bem-vindo ao ONGHub</h1>
+            <p class="text-lg text-gray-600 mb-6">Acesse ou cadastre sua ONG para começar.</p>
 
-        <div class="d-grid gap-3 col-6 mx-auto">
-            <a href="{{ route('login') }}" class="btn btn-primary btn-lg">Login</a>
-            <a href="{{ route('user.registration') }}" class="btn btn-success btn-lg">Cadastrar ONG</a>
-            <a href="{{ route('reativar.conta') }}" class="btn btn-outline-secondary btn-lg">Reativar Conta</a>
-            <a href="{{ route('intencaodoacao.create') }}" class="btn btn-warning btn-lg">Quero doar</a>
-            <a href="{{ route('pedidodoacao.create') }}" class="btn btn-danger btn-lg">Solicitar doação</a>
+            <div class="flex flex-col gap-3">
+                <a href="{{ route('login') }}" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition">Login</a>
+                <a href="{{ route('user.registration') }}" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">Cadastrar ONG</a>
+                <a href="{{ route('reativar.conta') }}" class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600 transition">Reativar Conta</a>
+                <a href="{{ route('intencaodoacao.create') }}" class="bg-yellow-400 text-white py-2 px-4 rounded hover:bg-yellow-500 transition">Quero doar</a>
+                <a href="{{ route('pedidodoacao.create') }}" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition">Solicitar doação</a>
+            </div>
         </div>
     </div>
 
 </body>
 </html>
-
