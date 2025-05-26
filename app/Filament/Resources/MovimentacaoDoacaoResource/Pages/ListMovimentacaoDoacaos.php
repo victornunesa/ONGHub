@@ -22,6 +22,11 @@ class ListMovimentacaoDoacaos extends ListRecords
         return $this->getFilters();
     }
 
+    // ListMovimentacaoDoacaos.php
+    public function getAppliedFilters(): array
+    {
+        return $this->getAppliedTableFilters();
+    }
 
 
 

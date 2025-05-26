@@ -108,28 +108,31 @@ class MovimentacaoDoacaoResource extends Resource
                                 ]
                             )
                             ->modifyQueryUsing(function ($query, $livewire) {
-                                // Filtra só registros da ONG logada
+                                // Filtra registros da ONG logada
                                 $query->where(function ($q) {
                                     $q->where('ong_destino_id', auth()->user()->ong->id)
-                                    ->orWhere('ong_origem_id', auth()->user()->ong->id);
+                                        ->orWhere('ong_origem_id', auth()->user()->ong->id);
                                 });
 
-                                // Pega filtros ativos da tabela
-                                $filters = method_exists($livewire, 'getFilters') ? $livewire->getFilters() : [];
+                                // Captura os filtros aplicados na tabela
+                                $filters = $livewire->tableFilters ?? [];
 
-                                if (!empty($filters['status'])) {
-                                    $query->where('status', $filters['status']);
+                                // Filtro por status
+                                if (!empty($filters['status']['value'])) {
+                                    $query->where('status', $filters['status']['value']);
                                 }
 
+                                // Filtro por período
                                 if (!empty($filters['periodo']['data_inicio'])) {
                                     $query->whereDate('data_doacao', '>=', Carbon::parse($filters['periodo']['data_inicio'])->format('Y-m-d'));
                                 }
+
                                 if (!empty($filters['periodo']['data_fim'])) {
                                     $query->whereDate('data_doacao', '<=', Carbon::parse($filters['periodo']['data_fim'])->format('Y-m-d'));
                                 }
 
                                 return $query;
-                            }),
+                            })
                     ]),
             ])
             ->bulkActions([

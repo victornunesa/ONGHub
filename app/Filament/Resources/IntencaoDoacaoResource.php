@@ -59,6 +59,7 @@ class IntencaoDoacaoResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'Registrada' => 'gray',
                         'Recebida' => 'success',
+                        'Cancelada' => 'danger',
                         default => 'warning'
                     }),
                     
@@ -158,7 +159,26 @@ class IntencaoDoacaoResource extends Resource
                     ->modalWidth('md')
                     ->modalHeading(fn ($record) => 'Receber: ' . $record->descricao)
                     ->modalDescription('Confirme os detalhes da doação recebida')
-                    ->after(fn () => \Filament\Actions\Action::make('redirect')->url(IntencaoDoacaoResource::getUrl('index')))
+                    ->after(fn () => \Filament\Actions\Action::make('redirect')->url(IntencaoDoacaoResource::getUrl('index'))),
+                
+                Action::make('cancelar')
+                    ->label('Cancelar')
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn ($record) => $record->status === 'Registrada')
+                    ->action(function ($record) {
+                        $record->update([
+                            'status' => 'Cancelada',
+                        ]);
+
+                        Notification::make()
+                            ->title('Intenção de doação cancelada')
+                            ->body('A intenção foi cancelada com sucesso.')
+                            ->success()
+                            ->send();
+                    }),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
