@@ -66,23 +66,14 @@
 
                             <hr class="my-4">
                             
-                            <h5 class="mb-4">Selecione a ONG para doação</h5>
-                            <div class="row mb-4" id="ongs-container">
-                                @foreach($ongs as $ong)
-                                <div class="col-md-6 mb-3">
-                                    <div class="card ong-card" data-ong-id="{{ $ong->id }}">
-                                        <div class="card-body">
-                                            <h5 class="card-title">{{ $ong->nome }}</h5>
-                                            <p class="card-text">
-                                                <strong>CNPJ:</strong> {{ $ong->cnpj }}<br>
-                                                <strong>Email:</strong> {{ $ong->email }}<br>
-                                                <strong>Telefone:</strong> {{ $ong->telefone }}<br>
-                                                <strong>Endereço:</strong> {{ $ong->endereco }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endforeach
+                            <div class="mb-4">
+                                <label for="ong_desejada" class="form-label">Selecione a ONG para doação</label>
+                                <select class="form-select" name="ong_desejada" id="ong_desejada" required>
+                                    <option value="">Selecione uma ONG</option>
+                                    @foreach($ongs as $ong)
+                                        <option value="{{ $ong->id }}">{{ $ong->nome }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <input type="hidden" name="ong_desejada" id="ong_desejada" required>
                             

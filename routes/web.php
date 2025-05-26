@@ -99,8 +99,9 @@ Route::post('/cadastro', function () {
 
         logger()->info('Usuário criado:', $user->toArray());
 
-        auth()->login($user); // Autentica o usuário
-        return redirect()->route('perfil'); // Redireciona para a rota do perfil
+        //auth()->login($user); // Autentica o usuário
+        Auth::login($user);
+        return redirect('/admin');
 
     } catch (\Exception $e) {
         logger()->error('Erro no cadastro:', ['error' => $e->getMessage()]);

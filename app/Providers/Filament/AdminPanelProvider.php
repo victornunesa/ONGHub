@@ -75,6 +75,14 @@ class AdminPanelProvider extends PanelProvider
                     ->group('Conta')
                     ->sort(0),
             ]);
+
+            // Sobrescreve o item de logout no menu do usuário
+            Filament::getPanel('admin')->userMenuItems([
+                'logout' => \Filament\Navigation\UserMenuItem::make()
+                    ->label('Sair')
+                    ->url('/logout') // redireciona para a sua rota personalizada
+                    ->icon('heroicon-o-arrow-left-on-rectangle'),
+            ]);
         });
 
     }
