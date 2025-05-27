@@ -21,4 +21,12 @@ class PedidoDoacao extends Model
     {
         return $this->hasMany(Doacao::class, 'pedido_id');
     }
+
+    public function getQuantidadeNecessariaAttribute(): string
+    {
+        $totalDoado = $this->doacoes()->sum('quantidade');
+        $restante = max($this->quantidade - $totalDoado, 0);
+
+        return $restante;
+    }
 }
