@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
 class PedidoDoacaoResource extends Resource
 {
@@ -42,10 +43,11 @@ class PedidoDoacaoResource extends Resource
                 TextColumn::make('nome_solicitante')->searchable(),
                 TextColumn::make('quantidade'),
                 TextColumn::make('status')
+                ->label('Status')
                 ->color(fn (string $state): string => match ($state) {
-                    'Doação a iniciar' => 'warning',
+                    'Doacao a iniciar' => 'warning',
                     'Doado em parte' => 'gray',
-                    'Doação completa' => 'success'
+                    'Doacao completa' => 'success'
                 })
             ])
             ->filters([
@@ -63,7 +65,7 @@ class PedidoDoacaoResource extends Resource
                 Action::make('doar')
                 ->label('Doar')
                 ->icon('heroicon-m-hand-thumb-up')
-                ->visible(fn ($record) => $record->status !== 'Doação completa')
+                ->visible(fn ($record) => $record->status !== 'Doacao completa')
                 ->fillForm(fn ($record) => [
                     'quantidade_solicitada_pedido' => $record->quantidade,
                 ])
@@ -116,7 +118,7 @@ class PedidoDoacaoResource extends Resource
 
                     // Atualiza status do pedido
                     if ($data['quantidade'] == $record->quantidade) {
-                        $record->update(['status' => 'Doação completa']);
+                        $record->update(['status' => 'Doacao completa']);
                     } else {
                         $record->update(['status' => 'Doado em parte']);
                     }
