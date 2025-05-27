@@ -130,11 +130,14 @@ Route::post('/login', function () {
     }
 
     Auth::login($user);
+    request()->session()->regenerate();
     return redirect('/admin');
 });
 
 Route::post('/logout', function () {
     Auth::logout();
+    request()->session()->invalidate(); // Invalida a sessão
+    request()->session()->regenerateToken(); // Regenera o token CSRF
     return redirect('/login');
 })->name('logout');
 
