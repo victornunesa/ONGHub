@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PedidoDoacaoResource\Pages;
 use App\Filament\Resources\PedidoDoacaoResource\RelationManagers;
+use App\Models\Doacao;
 use App\Models\Estoque;
 use App\Models\PedidoDoacao;
 use Filament\Forms;
@@ -35,19 +36,28 @@ class PedidoDoacaoResource extends Resource
                 //
             ]);
     }
+    
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('status', '!=', 'Doação completa');
+    }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
                 TextColumn::make('nome_solicitante')->searchable(),
-                TextColumn::make('quantidade'),
+                TextColumn::make('tipo')->searchable(),
+                TextColumn::make('quantidade_necessaria')
+                    ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
+                    ->label('Quantidade'),
                 TextColumn::make('status')
                 ->label('Status')
                 ->color(fn (string $state): string => match ($state) {
-                    'Doacao a iniciar' => 'warning',
-                    'Doado em parte' => 'gray',
-                    'Doacao completa' => 'success'
+                    'Registrada' => 'warning', //'Doação em aberto'
+                    'Doação em parte' => 'gray',
+                    'Doação completa' => 'success'
                 })
             ])
             ->filters([
@@ -65,7 +75,7 @@ class PedidoDoacaoResource extends Resource
                 Action::make('doar')
                 ->label('Doar')
                 ->icon('heroicon-m-hand-thumb-up')
-                ->visible(fn ($record) => $record->status !== 'Doacao completa')
+                ->visible(fn ($record) => $record->status !== 'Doação completa')
                 ->fillForm(fn ($record) => [
                     'quantidade_solicitada_pedido' => $record->quantidade,
                 ])
@@ -116,15 +126,29 @@ class PedidoDoacaoResource extends Resource
                 ->action(function ($record, array $data) {
                     $estoque = Estoque::find($data['estoque_id']);
 
-                    // Atualiza status do pedido
-                    if ($data['quantidade'] == $record->quantidade) {
-                        $record->update(['status' => 'Doacao completa']);
-                    } else {
-                        $record->update(['status' => 'Doado em parte']);
-                    }
-
                     $estoque->quantidade -= $data['quantidade'];
                     $estoque->save();
+
+                    Doacao::create([
+                        'pedido_id' => $record->id,
+                        'nome_doador' => $record->nome_solicitante,
+                        'email_doador' => $record->email_solicitante,
+                        'telefone_doador' => $record->telefone_solicitante,
+                        'descricao' => $record->descricao,
+                        'quantidade' => $data['quantidade'],
+                        'unidade' => $estoque->unidade,
+                        'data_doacao' => now(),
+                        'status' => 'Saida',
+                        'ong_destino_id' =>  null,
+                        'ong_origem_id' =>  auth()->user()->ong->id
+                    ]);
+
+                    // Atualiza status do pedido
+                    if ($record->quantidade_necessaria == 0) {
+                        $record->update(['status' => 'Doação completa']);
+                    } else {
+                        $record->update(['status' => 'Doação em parte']);
+                    }
 
                     Notification::make()
                         ->title('Doação registrada com sucesso')

@@ -35,6 +35,11 @@ class EstoqueResource extends Resource
                     'ml' => 'Mililitros',
                     'l' => 'Litro'
                 ])->native(false)->required(),
+
+                // Campos para o doador
+                TextInput::make('nome_doador')->label('Nome do doador')->required()->maxLength(100),
+                TextInput::make('email_doador')->label('Email do doador')->email()->maxLength(150),
+                TextInput::make('telefone_doador')->label('Telefone do doador')->maxLength(15),
             ]);
     }
 
@@ -65,6 +70,12 @@ class EstoqueResource extends Resource
         return [
             //
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('ong_id', auth()->user()->ong->id);
     }
 
     public static function getPages(): array

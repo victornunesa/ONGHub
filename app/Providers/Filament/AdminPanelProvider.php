@@ -17,6 +17,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Facades\Filament;
+use Filament\Navigation\NavigationItem;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -24,6 +26,8 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
+            ->brandName('ONGHub')
+            //->brandLogo(asset('images/logo.png'))
             ->id('admin')
             ->path('admin')
             ->login()
@@ -33,7 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                //Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
@@ -54,5 +58,32 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    public function boot(): void
+    {
+        Filament::serving(function () {
+            Filament::registerRenderHook('panels::brand', fn () => '
+                <img src="' . asset('images/logo.png') . '" alt="ONGHub" style="height: 100px;">
+            ');
+
+            // Aqui registramos o item do menu lateral
+            /*Filament::registerNavigationItems([
+                \Filament\Navigation\NavigationItem::make('Meu Perfil')
+                    ->url('/perfil')
+                    ->icon('heroicon-o-user-circle')
+                    ->group('Conta')
+                    ->sort(0),
+            ]);*/
+
+            // Sobrescreve o item de logout no menu do usuário
+            Filament::getPanel('admin')->userMenuItems([
+                'logout' => \Filament\Navigation\UserMenuItem::make()
+                    ->label('Sair')
+                    ->url('/logout') // redireciona para a sua rota personalizada
+                    ->icon('heroicon-o-arrow-left-on-rectangle'),
+            ]);
+        });
+
     }
 }

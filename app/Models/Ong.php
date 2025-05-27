@@ -24,4 +24,16 @@ class Ong extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    // Relação com intenções de doação (se aplicável)
+    public function intencoesDoacao()
+    {
+        return $this->hasMany(IntencaoDoacao::class);
+    }
+
+    // Relação com estoque - SOMENTE SE a tabela estoque tiver ong_id
+    public function estoque()
+    {
+        return $this->hasMany(Estoque::class);
+    }
 }

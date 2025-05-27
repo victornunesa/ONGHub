@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\Ong;
 use App\Models\User;
+use App\Models\IntencaoDoacao;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
@@ -44,9 +45,9 @@ Route::post('/reativar-conta', function () {
         $user->ong()->update(['status' => 'ativo']);
     });
 
-    auth()->login($user);
+    Auth::guard(config('filament.auth.guard'))->login($user);
 
-    return redirect()->route('perfil')->with('success', 'Conta reativada com sucesso!');
+    return redirect("/admin")->with('success', 'Conta reativada com sucesso!');
 })->name('reativar.conta.processar');
 
 
@@ -98,8 +99,9 @@ Route::post('/cadastro', function () {
 
         logger()->info('Usuário criado:', $user->toArray());
 
-        auth()->login($user); // Autentica o usuário
-        return redirect()->route('perfil'); // Redireciona para a rota do perfil
+        //auth()->login($user); // Autentica o usuário
+        Auth::login($user);
+        return redirect('/admin');
 
     } catch (\Exception $e) {
         logger()->error('Erro no cadastro:', ['error' => $e->getMessage()]);
@@ -128,13 +130,99 @@ Route::post('/login', function () {
     }
 
     Auth::login($user);
-    return redirect()->route('perfil');
+    request()->session()->regenerate();
+    return redirect('/admin');
 });
 
 Route::post('/logout', function () {
     Auth::logout();
+    request()->session()->invalidate(); // Invalida a sessão
+    request()->session()->regenerateToken(); // Regenera o token CSRF
     return redirect('/login');
 })->name('logout');
+
+// Adicione esta rota com as outras rotas GET
+Route::get('/doacao', function () {
+    return view('pedidodoacao-form');
+})->name('pedidodoacao.create');
+
+// Adicione esta rota para processar o formulário
+Route::post('/doacao', function () {
+    $validated = request()->validate([
+        'nome_solicitante' => 'required|string|max:100',
+        'email_solicitante' => 'required|email|max:100',
+        'telefone_solicitante' => 'required|string|max:15',
+        'itens' => 'required|array|min:1',
+        'itens.*.descricao' => 'required|string|max:255',
+        'itens.*.quantidade' => 'required|numeric|min:0.1', // Permite valores decimais
+        'itens.*.unidade' => 'required|string|in:kg,g,L,ml,un,cx,pct,lata,saca,dz,band,fardo,vidro',
+    ]);
+
+    $dadosPessoais = [
+        'nome_solicitante' => $validated['nome_solicitante'],
+        'email_solicitante' => $validated['email_solicitante'],
+        'telefone_solicitante' => $validated['telefone_solicitante'],
+        'tipo' => 'Alimentos',
+        'status' => 'Registrada',
+        'data_pedido' => now(),
+    ];
+
+    foreach ($validated['itens'] as $item) {
+    \App\Models\PedidoDoacao::create([
+        'nome_solicitante' => $validated['nome_solicitante'],
+        'email_solicitante' => $validated['email_solicitante'],
+        'telefone_solicitante' => $validated['telefone_solicitante'],
+        'tipo' => 'Alimentos',
+        'status' => 'Registrada',
+        'data_pedido' => now(),
+        'descricao' => $item['descricao'],
+        'quantidade' => $item['quantidade'],
+        'unidade' => $item['unidade'] // Garantindo que pegue a unidade do item
+    ]);
+}
+
+    return redirect('/')->with('success', 'Doação registrada!');
+})->name('doacao.store');
+
+// Rota para exibir o formulário
+Route::get('/intencao-doacao', function () {
+    $ongs = \App\Models\Ong::where('status', 'ativo')->get();
+    return view('intencaodoacao-form', ['ongs' => $ongs]);
+})->name('intencaodoacao.create');
+
+// Rota para processar o formulário
+Route::post('/intencao-doacao', function () {
+    $validated = request()->validate([
+        'nome_solicitante' => 'required|string|max:100',
+        'email_solicitante' => 'required|email|max:100',
+        'telefone_solicitante' => 'required|string|max:15',
+        'ong_desejada' => 'required|exists:ong,id',  // Corrigido para 'ong' (nome da tabela)
+        'itens' => 'required|array|min:1',
+        'itens.*.descricao' => 'required|string|max:255',
+        'itens.*.quantidade' => 'required|numeric|min:0.1',
+        'itens.*.unidade' => 'required|string|in:kg,g,L,ml,un,cx,pct,lata,saca,dz,band,fardo,vidro',
+    ]);
+
+    foreach ($validated['itens'] as $item) {
+        \App\Models\IntencaoDoacao::create([
+            'nome_solicitante' => $validated['nome_solicitante'],
+            'email_solicitante' => $validated['email_solicitante'],
+            'telefone_solicitante' => $validated['telefone_solicitante'],
+            'ong_desejada' => $validated['ong_desejada'],
+            'tipo' => 'Alimentos',
+            'status' => 'Registrada',
+            'data_pedido' => now(),
+            'descricao' => $item['descricao'],
+            'quantidade' => $item['quantidade'],
+            'unidade' => $item['unidade']
+        ]);
+    }
+
+    return redirect('/')->with('success', 'Sua intenção foi registrada!');
+})->name('intencao.store');
+
+// routes/web.php
+Route::redirect('/perfil', '/admin/perfil')->middleware(['auth']);
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/perfil', function () {
@@ -145,7 +233,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('perfil');
 
     // Rota para exibir o formulário de edição
-    Route::get('/perfil/editar', function () {
+    /*Route::get('/perfil/editar', function () {
         $user = auth()->user();
         $ong = $user->ong;
         return view('editar-perfil', compact('user', 'ong'));
@@ -206,7 +294,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         return redirect()->route('perfil')->with('success', 'Perfil atualizado com sucesso!');
-    })->name('perfil.atualizar');
+    })->name('perfil.atualizar');*/
 
     Route::delete('/perfil/deletar', function () {
         $user = auth()->user();
@@ -216,7 +304,9 @@ Route::middleware(['auth'])->group(function () {
             $user->ong()->delete(); // Deleta a ONG associada
         });
 
-        auth()->logout();
+        Auth::logout();
+        request()->session()->invalidate(); // Invalida a sessão
+        request()->session()->regenerateToken(); // Regenera o token CSRF
 
         return redirect('/')->with('success', 'Conta excluída com sucesso.');
     })->name('perfil.deletar');
@@ -229,7 +319,9 @@ Route::middleware(['auth'])->group(function () {
             $user->ong()->update(['status' => 'inativo']);
         });
 
-        auth()->logout();
+        Auth::logout();
+        request()->session()->invalidate(); // Invalida a sessão
+        request()->session()->regenerateToken(); // Regenera o token CSRF
 
         return redirect('/')->with('success', 'Sua conta foi inativada com sucesso.');
     })->name('perfil.inativar');
