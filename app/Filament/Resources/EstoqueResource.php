@@ -27,7 +27,7 @@ class EstoqueResource extends Resource
         return $form
             ->schema([
                 TextInput::make('nome_item')->label('Nome do item')->required()->maxLength(255),
-                TextInput::make('quantidade')->label('Quantidade real')->required()->numeric(),
+                TextInput::make('quantidade')->label('Quantidade')->required()->numeric(),
                 Select::make('unidade')
                 ->options([
                     'g' => 'Grama',
@@ -49,7 +49,7 @@ class EstoqueResource extends Resource
             ->columns([
                 TextColumn::make('nome_item'),
                 TextColumn::make('quantidade'),
-                TextColumn::make('quantidade_solicitada')->label('Quantidade alocada'),
+                TextColumn::make('quantidade_solicitada')->label('Quantidade'),
                 TextColumn::make('unidade')
             ])
             ->filters([

@@ -17,9 +17,4 @@ class Estoque extends Model
     {
         return $this->belongsTo(Ong::class);
     }
-
-    public function getEstoqueRealAttribute()
-    {
-        return $this->quantidade - $this->quantidade_solicitada;
-    }
 }
