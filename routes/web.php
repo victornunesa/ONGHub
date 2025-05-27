@@ -45,9 +45,9 @@ Route::post('/reativar-conta', function () {
         $user->ong()->update(['status' => 'ativo']);
     });
 
-    auth()->login($user);
+    Auth::guard(config('filament.auth.guard'))->login($user);
 
-    return redirect()->route('perfil')->with('success', 'Conta reativada com sucesso!');
+    return redirect("/admin")->with('success', 'Conta reativada com sucesso!');
 })->name('reativar.conta.processar');
 
 
@@ -221,6 +221,9 @@ Route::post('/intencao-doacao', function () {
     return redirect('/')->with('success', 'Sua intenção foi registrada!');
 })->name('intencao.store');
 
+// routes/web.php
+Route::redirect('/perfil', '/admin/perfil')->middleware(['auth']);
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/perfil', function () {
         $user = auth()->user();
@@ -230,7 +233,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('perfil');
 
     // Rota para exibir o formulário de edição
-    Route::get('/perfil/editar', function () {
+    /*Route::get('/perfil/editar', function () {
         $user = auth()->user();
         $ong = $user->ong;
         return view('editar-perfil', compact('user', 'ong'));
@@ -291,7 +294,7 @@ Route::middleware(['auth'])->group(function () {
         });
 
         return redirect()->route('perfil')->with('success', 'Perfil atualizado com sucesso!');
-    })->name('perfil.atualizar');
+    })->name('perfil.atualizar');*/
 
     Route::delete('/perfil/deletar', function () {
         $user = auth()->user();

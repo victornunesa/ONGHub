@@ -59,6 +59,7 @@ class IntencaoDoacaoResource extends Resource
                     
                 TextColumn::make('status')
                     ->badge()
+                    ->searchable()
                     ->color(fn (string $state): string => match ($state) {
                         'Registrada' => 'gray',
                         'Recebida' => 'success',

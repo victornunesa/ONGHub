@@ -68,13 +68,13 @@ class AdminPanelProvider extends PanelProvider
             ');
 
             // Aqui registramos o item do menu lateral
-            Filament::registerNavigationItems([
+            /*Filament::registerNavigationItems([
                 \Filament\Navigation\NavigationItem::make('Meu Perfil')
                     ->url('/perfil')
                     ->icon('heroicon-o-user-circle')
                     ->group('Conta')
                     ->sort(0),
-            ]);
+            ]);*/
 
             // Sobrescreve o item de logout no menu do usuário
             Filament::getPanel('admin')->userMenuItems([
