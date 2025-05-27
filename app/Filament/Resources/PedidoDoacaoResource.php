@@ -43,8 +43,8 @@ class PedidoDoacaoResource extends Resource
                 TextColumn::make('quantidade'),
                 TextColumn::make('status')
                 ->color(fn (string $state): string => match ($state) {
-                    'Doação em aberto' => 'warning',
-                    'Doação em parte' => 'gray',
+                    'Doação a iniciar' => 'warning',
+                    'Doado em parte' => 'gray',
                     'Doação completa' => 'success'
                 })
             ])
@@ -91,7 +91,7 @@ class PedidoDoacaoResource extends Resource
                         ->rule(function (Get $get) {
                             $estoqueId = $get('estoque_id');
                             $estoque = Estoque::find($estoqueId);
-                            $quantidadeEstoque = $estoque?->estoque_real ?? 0;
+                            $quantidadeEstoque = $estoque?->quantidade ?? 0;
 
                             $quantidadeSolicitada = $get('quantidade_solicitada_pedido') ?? 0;
 
@@ -102,7 +102,7 @@ class PedidoDoacaoResource extends Resource
                         ->helperText(function (Get $get) {
                             $estoqueId = $get('estoque_id');
                             $estoque = Estoque::find($estoqueId);
-                            $estoqueQtd = $estoque?->estoque_real ?? 0;
+                            $estoqueQtd = $estoque?->quantidade ?? 0;
 
                             $pedidoQtd = $get('quantidade_solicitada_pedido') ?? 0;
 
@@ -118,10 +118,10 @@ class PedidoDoacaoResource extends Resource
                     if ($data['quantidade'] == $record->quantidade) {
                         $record->update(['status' => 'Doação completa']);
                     } else {
-                        $record->update(['status' => 'Doação em parte']);
+                        $record->update(['status' => 'Doado em parte']);
                     }
 
-                    $estoque->quantidade_solicitada += $data['quantidade'];
+                    $estoque->quantidade -= $data['quantidade'];
                     $estoque->save();
 
                     Notification::make()
