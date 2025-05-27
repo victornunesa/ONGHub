@@ -47,6 +47,7 @@ class IntencaoDoacaoResource extends Resource
                     
                 TextColumn::make('descricao')
                     ->label('Item')
+                    ->searchable()
                     ->limit(30)
                     ->tooltip(function (TextColumn $column) {
                         return $column->getState();
@@ -200,7 +201,7 @@ class IntencaoDoacaoResource extends Resource
     {
         return [
             'index' => Pages\ListIntencaoDoacaos::route('/'),
-            'create' => Pages\CreateIntencaoDoacao::route('/create'),
+            //'create' => Pages\CreateIntencaoDoacao::route('/create'),
             'edit' => Pages\EditIntencaoDoacao::route('/{record}/edit'),
         ];
     }

@@ -18,6 +18,7 @@ use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use pxlrbt\FilamentExcel\Columns\Column;
 use Maatwebsite\Excel\Excel;
+use Filament\Forms\Components\TextInput;
 
 class MovimentacaoDoacaoResource extends Resource
 {
@@ -43,8 +44,8 @@ class MovimentacaoDoacaoResource extends Resource
                     ->dateTime('d/m/Y H:i'),
 
                 TextColumn::make('descricao')
-                    ->label('Item')
-                    ->searchable(),
+                    ->label('Item'),
+                    //->searchable(),
 
                 TextColumn::make('quantidade')
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade),
@@ -69,6 +70,20 @@ class MovimentacaoDoacaoResource extends Resource
                         'Entrada' => 'Entradas',
                         'Saída'   => 'Saídas',
                     ]),
+                
+                Filter::make('descricao')
+                    ->label('Item')
+                    ->form([
+                        TextInput::make('value')
+                            ->label('Item')
+                            ->placeholder('Buscar por item...'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if ($data['value']) {
+                            $query->where('descricao', 'like', '%' . $data['value'] . '%');
+                        }
+                        return $query;
+                    }),
 
                 Filter::make('periodo')
                     ->form([
@@ -129,6 +144,10 @@ class MovimentacaoDoacaoResource extends Resource
 
                                 if (!empty($filters['periodo']['data_fim'])) {
                                     $query->whereDate('data_doacao', '<=', Carbon::parse($filters['periodo']['data_fim'])->format('Y-m-d'));
+                                }
+
+                                if (!empty($filters['descricao']['value'])) {
+                                    $query->where('descricao', 'like', '%' . $filters['descricao']['value'] . '%');
                                 }
 
                                 return $query;

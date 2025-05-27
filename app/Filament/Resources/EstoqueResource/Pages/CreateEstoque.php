@@ -63,7 +63,7 @@ class CreateEstoque extends CreateRecord
             'nome_doador' => $data['nome_doador'],
             'email_doador' => $data['email_doador'] ?? null,
             'telefone_doador' => $data['telefone_doador'] ?? null,
-            'descricao' =>  $data['nome_item']." (registro direto)",
+            'descricao' =>  $data['nome_item'],
             'quantidade' => $data['quantidade'],
             'unidade' => $data['unidade'],
             'data_doacao' => now(),
