@@ -36,7 +36,7 @@ class PedidoDoacaoResource extends Resource
                 //
             ]);
     }
-    
+
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
@@ -51,7 +51,7 @@ class PedidoDoacaoResource extends Resource
                 TextColumn::make('tipo')->searchable(),
                 TextColumn::make('quantidade_necessaria')
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
-                    ->label('Quantidade'),
+                    ->label('Qtd faltante'),
                 TextColumn::make('status')
                 ->label('Status')
                 ->color(fn (string $state): string => match ($state) {
