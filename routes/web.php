@@ -304,7 +304,9 @@ Route::middleware(['auth'])->group(function () {
             $user->ong()->delete(); // Deleta a ONG associada
         });
 
-        auth()->logout();
+        Auth::logout();
+        request()->session()->invalidate(); // Invalida a sessão
+        request()->session()->regenerateToken(); // Regenera o token CSRF
 
         return redirect('/')->with('success', 'Conta excluída com sucesso.');
     })->name('perfil.deletar');
@@ -317,7 +319,9 @@ Route::middleware(['auth'])->group(function () {
             $user->ong()->update(['status' => 'inativo']);
         });
 
-        auth()->logout();
+        Auth::logout();
+        request()->session()->invalidate(); // Invalida a sessão
+        request()->session()->regenerateToken(); // Regenera o token CSRF
 
         return redirect('/')->with('success', 'Sua conta foi inativada com sucesso.');
     })->name('perfil.inativar');
