@@ -21,6 +21,8 @@ class EstoqueResource extends Resource
     protected static ?string $model = Estoque::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationLabel = 'Estoque';
+    protected static ?string $modelLabel = 'Estoque ';
 
     public static function form(Form $form): Form
     {
@@ -47,21 +49,27 @@ class EstoqueResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('nome_item'),
-                TextColumn::make('quantidade'),
-                TextColumn::make('quantidade_solicitada')->label('Quantidade'),
+                TextColumn::make('nome_item')
+                    ->label('Item')
+                    ->searchable(),
+
+                TextColumn::make('quantidade')
+                    ->label('Quantidade'),
+                //TextColumn::make('quantidade_solicitada')->label('Quantidade'),
                 TextColumn::make('unidade')
+                    ->label('Unidade')
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
+                /*Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                ]),*/
             ]);
     }
 

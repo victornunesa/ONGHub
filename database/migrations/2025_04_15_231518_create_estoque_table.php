@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('ong_id')->constrained('ong');
             $table->string('nome_item', 100);
             $table->integer('quantidade');
-            $table->integer('quantidade_solicitada');
+            $table->integer('quantidade_solicitada')->nullable()->default(null);
             $table->date('data_atualizacao');
             $table->timestamps();
         });

@@ -59,9 +59,11 @@ class MovimentacaoDoacaoResource extends Resource
                         default => 'gray',
                     }),
 
-                TextColumn::make('data_doacao')
-                    ->label('Data Doação')
-                    ->date('d/m/Y'),
+                TextColumn::make('nome_doador')
+                    ->label('Nome Beneficiário')
+                    ->formatStateUsing(fn ($state, $record) => 
+                        $record->status === 'Saida' ? $state : null
+                    ),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -112,7 +114,11 @@ class MovimentacaoDoacaoResource extends Resource
                                     ->heading('Quantidade')
                                     ->formatStateUsing(fn ($record) => $record->quantidade . ' ' . $record->unidade),
                                 Column::make('status')->heading('Operação'),
-                                Column::make('data_doacao')->heading('Data Doação'),
+                                Column::make('nome_doador')
+                                    ->heading('Nome Beneficiário')
+                                    ->formatStateUsing(fn ($record) => 
+                                        $record->status === 'Saida' ? $record->nome_doador : null
+                                    ),
                             ])
                             ->askForFilename()
                             ->askForWriterType(

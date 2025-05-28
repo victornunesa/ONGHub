@@ -13,6 +13,10 @@ class Estoque extends Model
         'quantidade_solicitada', 'data_atualizacao', 'unidade'
     ];
 
+    protected $attributes = [
+        'quantidade_solicitada' => 0,
+    ];
+
     public function ong()
     {
         return $this->belongsTo(Ong::class);

@@ -27,7 +27,9 @@ class PedidoDoacaoResource extends Resource
 {
     protected static ?string $model = PedidoDoacao::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-pencil-square';
+    protected static ?string $navigationLabel = 'Pedidos de doação';
+    protected static ?string $modelLabel = 'Pedidos de doação ';
 
     public static function form(Form $form): Form
     {
@@ -53,10 +55,11 @@ class PedidoDoacaoResource extends Resource
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
                     ->label('Qtd faltante'),
                 TextColumn::make('status')
+                ->badge()
                 ->label('Status')
                 ->color(fn (string $state): string => match ($state) {
-                    'Registrada' => 'warning', //'Doação em aberto'
-                    'Doação em parte' => 'gray',
+                    'Registrada' => 'gray', //'Doação em aberto'
+                    'Doação em parte' => 'warning',
                     'Doação completa' => 'success'
                 })
             ])
@@ -179,8 +182,16 @@ class PedidoDoacaoResource extends Resource
     {
         return [
             'index' => Pages\ListPedidoDoacaos::route('/'),
-            'create' => Pages\CreatePedidoDoacao::route('/create'),
+            //'create' => Pages\CreatePedidoDoacao::route('/create'),
             'edit' => Pages\EditPedidoDoacao::route('/{record}/edit'),
         ];
     }
+
+    public static function canCreate(): bool
+    {
+        return false; // esconde o botão Create
+    }
+
 }
+
+

@@ -17,7 +17,7 @@ class OngResource extends Resource
 {
     protected static ?string $model = Ong::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    //protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function form(Form $form): Form
     {
@@ -61,4 +61,10 @@ class OngResource extends Resource
             'edit' => Pages\EditOng::route('/{record}/edit'),
         ];
     }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
 }

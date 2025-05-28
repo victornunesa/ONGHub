@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('ong', function (Blueprint $table) {
             $table->id();
             $table->string('nome', 100);
-            $table->string('cnpj', 20); // Ajustei o tamanho para CNPJ
-            $table->string('email', 100);
+            $table->string('cnpj', 20)->unique(); // Ajustei o tamanho para CNPJ
+            $table->string('email', 100)->unique();
             $table->string('telefone', 15);
             $table->string('endereco');
             $table->string('status', 50);

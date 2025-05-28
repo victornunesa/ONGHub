@@ -47,6 +47,16 @@
                     <div class="card-body">
                         <form action="{{ route('intencao.store') }}" method="POST" id="formDoacao">
                             @csrf
+
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
                             
                             <h5 class="mb-4">Dados Pessoais</h5>
                             <div class="mb-3">
@@ -75,7 +85,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <input type="hidden" name="ong_desejada" id="ong_desejada" required>
+                            <!--<input type="hidden" name="ong_desejada" id="ong_desejada" required>-->
                             
                             <hr class="my-4">
                             

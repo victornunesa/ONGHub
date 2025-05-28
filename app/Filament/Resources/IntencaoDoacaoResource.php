@@ -76,17 +76,30 @@ class IntencaoDoacaoResource extends Resource
             ])
             ->actions([
                 Action::make('receber')
-                    ->label('Receber Doação')
+                    ->label('Receber')
                     ->icon('heroicon-s-check-circle')
                     ->visible(fn ($record) => $record->status === 'Registrada')
                     ->form([
+                        Forms\Components\TextInput::make('nome_item')
+                            ->label('Item do Estoque')
+                            ->datalist(
+                                \App\Models\Estoque::where('ong_id', auth()->user()->ong->id)
+                                    ->pluck('nome_item')
+                                    ->unique()
+                                    ->values()
+                                    ->toArray()
+                            )
+                            ->default(fn ($record) => $record->descricao)
+                            ->required()
+                            ->helperText('Digite o nome do item.'),
+
                         Forms\Components\TextInput::make('quantidade_recebida')
                             ->label('Quantidade Recebida')
                             ->numeric()
                             ->minValue(0.1)
                             ->default(fn ($record) => $record->quantidade)
                             ->required(),
-                            
+
                         Forms\Components\Select::make('unidade_recebida')
                             ->label('Unidade de Recebimento')
                             ->options([
@@ -100,7 +113,7 @@ class IntencaoDoacaoResource extends Resource
                     ])
                     ->action(function ($record, array $data) {
                         \DB::transaction(function () use ($record, $data) {
-                            // Verifica se já existe registro para esta intenção
+                            // Evita duplicação de doação
                             if (Doacao::where('intencao_id', $record->id)->exists()) {
                                 Notification::make()
                                     ->title('Atenção')
@@ -110,14 +123,18 @@ class IntencaoDoacaoResource extends Resource
                                 return;
                             }
 
+
                             try {
-                                // 1. Registrar a movimentação na tabela doacao
+                                // Padroniza o nome do item: trim, lowercase, capitalize first letter
+                                $nomeItemPadronizado = ucfirst(strtolower(trim($data['nome_item'])));
+
+                                // 1. Criar movimentação na tabela doacao
                                 Doacao::create([
                                     'intencao_id' => $record->id,
                                     'nome_doador' => $record->nome_solicitante,
                                     'email_doador' => $record->email_solicitante,
                                     'telefone_doador' => $record->telefone_solicitante,
-                                    'descricao' => $record->descricao,
+                                    'descricao' => $nomeItemPadronizado, // Nome padronizado do item
                                     'quantidade' => $data['quantidade_recebida'],
                                     'unidade' => $data['unidade_recebida'],
                                     'data_doacao' => now(),
@@ -126,30 +143,31 @@ class IntencaoDoacaoResource extends Resource
                                     'ong_origem_id' => null
                                 ]);
 
-                                // 2. Atualizar o estoque
+                                // 2. Atualizar estoque (consolida se já existir)
                                 $itemEstoque = Estoque::firstOrNew([
                                     'ong_id' => auth()->user()->ong->id,
-                                    'nome_item' => $record->descricao,
+                                    'nome_item' => $nomeItemPadronizado,
                                     'unidade' => $data['unidade_recebida']
                                 ]);
-                                
+
                                 $itemEstoque->quantidade += $data['quantidade_recebida'];
                                 $itemEstoque->data_atualizacao = now();
+                                $itemEstoque->quantidade_solicitada = 0;
                                 $itemEstoque->save();
 
-                                // 3. Atualizar a intenção de doação
+                                // 3. Atualizar status da intenção
                                 $record->update([
                                     'status' => 'Recebida',
                                     'quantidade' => $data['quantidade_recebida'],
-                                    'unidade' => $data['unidade_recebida']
+                                    'unidade' => $data['unidade_recebida'],
                                 ]);
-                                
+
                                 Notification::make()
                                     ->title('Doação registrada com sucesso!')
                                     ->body('Estoque atualizado e movimentação registrada.')
                                     ->success()
                                     ->send();
-                                    
+
                             } catch (\Exception $e) {
                                 Notification::make()
                                     ->title('Erro ao registrar doação')
@@ -170,6 +188,8 @@ class IntencaoDoacaoResource extends Resource
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
+                    ->modalHeading('Cancelar intenção de doação')
+                    ->modalDescription('Tem certeza que deseja cancelar esta intenção? Esta ação não poderá ser desfeita.')
                     ->visible(fn ($record) => $record->status === 'Registrada')
                     ->action(function ($record) {
                         $record->update([

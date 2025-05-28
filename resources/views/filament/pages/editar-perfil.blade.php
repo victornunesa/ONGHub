@@ -1,6 +1,7 @@
 <x-filament::page>
     <x-filament::card class="max-w-3xl mx-auto space-y-6">
 
+
         <form wire:submit.prevent="submit" class="space-y-8">
             {{-- Campos principais agrupados com espaçamento --}}
             <div class="space-y-6">
@@ -108,14 +109,6 @@
 
             {{-- Botões --}}
             <div class="flex justify-end mt-8 gap-4">
-                <x-filament::button
-                    color="secondary"
-                    tag="a"
-                    href="{{ route('filament.admin.pages.perfil') }}"
-                >
-                    Cancelar
-                </x-filament::button>
-
                 <x-filament::button type="submit" color="info">
                     Salvar Alterações
                 </x-filament::button>
