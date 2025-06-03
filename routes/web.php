@@ -1,14 +1,18 @@
 <?php
 
+use App\Mail\PedidoCriadoMail;
 use Illuminate\Support\Facades\Route;
 use App\Models\Ong;
 use App\Models\User;
 use App\Models\IntencaoDoacao;
+use App\Models\PedidoDoacao;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 Route::get('/', function () {
     return view('welcome');
@@ -148,11 +152,15 @@ Route::get('/doacao', function () {
 
 // Adicione esta rota para processar o formulário
 Route::post('/doacao', function () {
+
+    $codigo = 'PD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+
     $validated = request()->validate([
         'nome_solicitante' => 'required|string|max:100',
         'email_solicitante' => 'required|email|max:100',
         'telefone_solicitante' => 'required|string|max:15',
         'itens' => 'required|array|min:1',
+        'cpf' => 'required|cpf',
         'itens.*.descricao' => 'required|string|max:255',
         'itens.*.quantidade' => 'required|numeric|min:0.1', // Permite valores decimais
         'itens.*.unidade' => 'required|string|in:kg,g,L,ml,un,cx,pct,lata,saca,dz,band,fardo,vidro',
@@ -168,18 +176,22 @@ Route::post('/doacao', function () {
     ];
 
     foreach ($validated['itens'] as $item) {
-    \App\Models\PedidoDoacao::create([
-        'nome_solicitante' => $validated['nome_solicitante'],
-        'email_solicitante' => $validated['email_solicitante'],
-        'telefone_solicitante' => $validated['telefone_solicitante'],
-        'tipo' => 'Alimentos',
-        'status' => 'Registrada',
-        'data_pedido' => now(),
-        'descricao' => $item['descricao'],
-        'quantidade' => $item['quantidade'],
-        'unidade' => $item['unidade'] // Garantindo que pegue a unidade do item
-    ]);
-}
+        $pedido_criado = \App\Models\PedidoDoacao::create([
+            'nome_solicitante' => $validated['nome_solicitante'],
+            'email_solicitante' => $validated['email_solicitante'],
+            'telefone_solicitante' => $validated['telefone_solicitante'],
+            'cpf' => $validated['cpf'],
+            'codigo' => $codigo,
+            'tipo' => 'Alimentos',
+            'status' => 'Registrada',
+            'data_pedido' => now(),
+            'descricao' => $item['descricao'],
+            'quantidade' => $item['quantidade'],
+            'unidade' => $item['unidade'] // Garantindo que pegue a unidade do item
+        ]);
+    }
+
+    Mail::to($validated['email_solicitante'])->send(new PedidoCriadoMail($pedido_criado));
 
     return redirect('/')->with('success', 'Doação registrada!');
 })->name('doacao.store');
@@ -189,6 +201,12 @@ Route::get('/intencao-doacao', function () {
     $ongs = \App\Models\Ong::where('status', 'ativo')->get();
     return view('intencaodoacao-form', ['ongs' => $ongs]);
 })->name('intencaodoacao.create');
+
+Route::get('/pedido/externo/{codigo}', function ($codigo) {
+    $pedidos = PedidoDoacao::where('codigo', $codigo)->get();
+
+    return view('pedido-externo.visualizar', ['pedidos' => $pedidos]);
+})->name('pedido.visualizar-externo');
 
 // Rota para processar o formulário
 Route::post('/intencao-doacao', function () {

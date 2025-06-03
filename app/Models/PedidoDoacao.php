@@ -14,7 +14,7 @@ class PedidoDoacao extends Model
 
     protected $fillable = [
         'nome_solicitante', 'email_solicitante', 'telefone_solicitante',
-        'descricao', 'quantidade', 'status', 'data_pedido', 'tipo', 'unidade'
+        'descricao', 'quantidade', 'status', 'data_pedido', 'tipo', 'unidade', 'cpf', 'codigo'
     ];
 
     public function doacoes()

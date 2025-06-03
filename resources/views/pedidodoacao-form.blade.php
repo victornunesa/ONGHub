@@ -35,25 +35,30 @@
                     <div class="card-body">
                         <form action="{{ route('doacao.store') }}" method="POST" id="formDoacao">
                             @csrf
-                            
+
                             <h5 class="mb-4">Dados Pessoais</h5>
                             <div class="mb-3">
                                 <label for="nome_solicitante" class="form-label">Nome</label>
                                 <input type="text" class="form-control" id="nome_solicitante" name="nome_solicitante" required>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="email_solicitante" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email_solicitante" name="email_solicitante" required>
                             </div>
-                            
+
+                            <div class="mb-3">
+                                <label for="cpf" class="form-label">CPF:</label>
+                                <input class="form-control" name="cpf" type="text" id="cpf" maxlength="14" oninput="mascararCPF(this)" placeholder="000.000.000-00" required>
+                            </div>
+
                             <div class="mb-3">
                                 <label for="telefone_solicitante" class="form-label">Telefone</label>
                                 <input type="tel" class="form-control" id="telefone_solicitante" name="telefone_solicitante" required>
                             </div>
 
                             <hr class="my-4">
-                            
+
                             <h5 class="mb-4">Itens solicitados</h5>
                             <div id="itens-container">
                                 <!-- Primeiro item -->
@@ -89,11 +94,11 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <button type="button" id="adicionar-item" class="btn btn-outline-primary mb-4">
                                 + Adicionar outro item
                             </button>
-                            
+
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-warning btn-lg">Confirmar solicitação</button>
                                 <a href="{{ url('/') }}" class="btn btn-outline-secondary">Cancelar</a>
@@ -107,6 +112,19 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+
+        function mascararCPF(input) {
+            let value = input.value.replace(/\D/g, '');
+
+            if (value.length > 11) value = value.slice(0, 11);
+
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d)/, '$1.$2');
+            value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+
+            input.value = value;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('itens-container');
             const addButton = document.getElementById('adicionar-item');
