@@ -50,7 +50,7 @@ class PedidoDoacaoResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('nome_solicitante')->searchable(),
-                TextColumn::make('tipo')->searchable(),
+                TextColumn::make('descricao')->searchable(),
                 TextColumn::make('quantidade_necessaria')
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
                     ->label('Qtd faltante'),
