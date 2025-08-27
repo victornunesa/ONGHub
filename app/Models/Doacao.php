@@ -21,6 +21,11 @@ class Doacao extends Model
         'status',
         'ong_destino_id', // Obrigatório para doações recebidas
         'ong_origem_id',
+        'data_validade'
+    ];
+
+    protected $casts = [
+        'data_validade' => 'date',
     ];
 
     public function intencao()

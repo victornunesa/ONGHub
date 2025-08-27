@@ -10,7 +10,11 @@ class Estoque extends Model
 
     protected $fillable = [
         'ong_id', 'nome_item', 'quantidade',
-        'quantidade_solicitada', 'data_atualizacao', 'unidade'
+        'quantidade_solicitada', 'data_atualizacao', 'unidade', 'data_validade'
+    ];
+
+    protected $casts = [
+        'data_validade' => 'date',
     ];
 
     protected $attributes = [

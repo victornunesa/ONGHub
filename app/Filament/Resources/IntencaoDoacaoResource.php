@@ -80,36 +80,52 @@ class IntencaoDoacaoResource extends Resource
                     ->icon('heroicon-s-check-circle')
                     ->visible(fn ($record) => $record->status === 'Registrada')
                     ->form([
-                        Forms\Components\TextInput::make('nome_item')
-                            ->label('Item do Estoque')
-                            ->datalist(
-                                \App\Models\Estoque::where('ong_id', auth()->user()->ong->id)
-                                    ->pluck('nome_item')
-                                    ->unique()
-                                    ->values()
-                                    ->toArray()
-                            )
-                            ->default(fn ($record) => $record->descricao)
-                            ->required()
-                            ->helperText('Digite o nome do item.'),
+                        Forms\Components\Repeater::make('itens_recebidos')
+                            ->label('Itens Recebidos')
+                            ->schema([
+                                Forms\Components\TextInput::make('nome_item')
+                                    ->label('Nome do Item')
+                                    ->datalist(
+                                        \App\Models\Estoque::where('ong_id', auth()->user()->ong->id)
+                                            ->pluck('nome_item')
+                                            ->unique()
+                                            ->values()
+                                            ->toArray()
+                                    )
+                                    ->default(fn ($record) => $record->descricao)
+                                    ->required()
+                                    ->helperText('Digite o nome do item.'),
 
-                        Forms\Components\TextInput::make('quantidade_recebida')
-                            ->label('Quantidade Recebida')
-                            ->numeric()
-                            ->minValue(0.1)
-                            ->default(fn ($record) => $record->quantidade)
-                            ->required(),
+                                Forms\Components\TextInput::make('quantidade_recebida')
+                                    ->label('Quantidade Recebida')
+                                    ->numeric()
+                                    ->minValue(0.1)
+                                    ->required(),
 
-                        Forms\Components\Select::make('unidade_recebida')
-                            ->label('Unidade de Recebimento')
-                            ->options([
-                                'kg' => 'Quilograma (kg)',
-                                'g' => 'Grama (g)',
-                                'L' => 'Litro (L)',
-                                'un' => 'Unidade (un)'
+                                Forms\Components\Select::make('unidade_recebida')
+                                    ->label('Unidade de Recebimento')
+                                    ->options([
+                                        'kg' => 'Quilograma (kg)',
+                                        'g' => 'Grama (g)',
+                                        'L' => 'Litro (L)',
+                                        'un' => 'Unidade (un)'
+                                    ])
+                                    ->default(fn ($record) => $record->unidade)
+                                    ->required(),
+
+                                Forms\Components\DatePicker::make('data_validade')
+                                    ->label('Data de Validade')
+                                    ->required()
+                                    ->minDate(now())
+                                    ->helperText('Informe a data de validade deste lote'),
                             ])
-                            ->default(fn ($record) => $record->unidade)
-                            ->required(),
+                            ->defaultItems(1)
+                            ->addActionLabel('Adicionar outro lote')
+                            ->reorderable(false)
+                            // ->grid(2)
+                            ->minItems(1)
+                            ->maxItems(10)
+                            ->helperText('Adicione diferentes lotes com prazos de validade distintos'),
                     ])
                     ->action(function ($record, array $data) {
                         \DB::transaction(function () use ($record, $data) {
@@ -123,48 +139,53 @@ class IntencaoDoacaoResource extends Resource
                                 return;
                             }
 
-
                             try {
-                                // Padroniza o nome do item: trim, lowercase, capitalize first letter
-                                $nomeItemPadronizado = ucfirst(strtolower(trim($data['nome_item'])));
+                                $totalQuantidadeRecebida = 0;
+                                
+                                foreach ($data['itens_recebidos'] as $item) {
+                                    // Padroniza o nome do item: trim, lowercase, capitalize first letter
+                                    $nomeItemPadronizado = ucfirst(strtolower(trim($item['nome_item'])));
+                                    $quantidade = $item['quantidade_recebida'];
+                                    $totalQuantidadeRecebida += $quantidade;
 
-                                // 1. Criar movimentação na tabela doacao
-                                Doacao::create([
-                                    'intencao_id' => $record->id,
-                                    'nome_doador' => $record->nome_solicitante,
-                                    'email_doador' => $record->email_solicitante,
-                                    'telefone_doador' => $record->telefone_solicitante,
-                                    'descricao' => $nomeItemPadronizado, // Nome padronizado do item
-                                    'quantidade' => $data['quantidade_recebida'],
-                                    'unidade' => $data['unidade_recebida'],
-                                    'data_doacao' => now(),
-                                    'status' => 'Entrada',
-                                    'ong_destino_id' => auth()->user()->ong->id,
-                                    'ong_origem_id' => null
-                                ]);
+                                    // 1. Criar movimentação na tabela doacao para cada lote
+                                    Doacao::create([
+                                        'intencao_id' => $record->id,
+                                        'nome_doador' => $record->nome_solicitante,
+                                        'email_doador' => $record->email_solicitante,
+                                        'telefone_doador' => $record->telefone_solicitante,
+                                        'descricao' => $nomeItemPadronizado,
+                                        'quantidade' => $quantidade,
+                                        'unidade' => $item['unidade_recebida'],
+                                        'data_validade' => $item['data_validade'],
+                                        'data_doacao' => now(),
+                                        'status' => 'Entrada',
+                                        'ong_destino_id' => auth()->user()->ong->id,
+                                        'ong_origem_id' => null
+                                    ]);
 
-                                // 2. Atualizar estoque (consolida se já existir)
-                                $itemEstoque = Estoque::firstOrNew([
-                                    'ong_id' => auth()->user()->ong->id,
-                                    'nome_item' => $nomeItemPadronizado,
-                                    'unidade' => $data['unidade_recebida']
-                                ]);
-
-                                $itemEstoque->quantidade += $data['quantidade_recebida'];
-                                $itemEstoque->data_atualizacao = now();
-                                $itemEstoque->quantidade_solicitada = 0;
-                                $itemEstoque->save();
+                                    // 2. Atualizar estoque para cada lote (cria registro separado para cada validade)
+                                    Estoque::create([
+                                        'ong_id' => auth()->user()->ong->id,
+                                        'nome_item' => $nomeItemPadronizado,
+                                        'unidade' => $item['unidade_recebida'],
+                                        'quantidade' => $quantidade,
+                                        'data_validade' => $item['data_validade'],
+                                        'data_atualizacao' => now(),
+                                        'quantidade_solicitada' => 0,
+                                    ]);
+                                }
 
                                 // 3. Atualizar status da intenção
                                 $record->update([
                                     'status' => 'Recebida',
-                                    'quantidade' => $data['quantidade_recebida'],
-                                    'unidade' => $data['unidade_recebida'],
+                                    'quantidade' => $totalQuantidadeRecebida,
+                                    'unidade' => $data['itens_recebidos'][0]['unidade_recebida'], // Usa a unidade do primeiro item
                                 ]);
 
                                 Notification::make()
                                     ->title('Doação registrada com sucesso!')
-                                    ->body('Estoque atualizado e movimentação registrada.')
+                                    ->body(count($data['itens_recebidos']) . ' lote(s) registrado(s) no estoque.')
                                     ->success()
                                     ->send();
 
@@ -178,9 +199,9 @@ class IntencaoDoacaoResource extends Resource
                             }
                         });
                     })
-                    ->modalWidth('md')
+                    ->modalWidth('lg') // Aumentei para lg para melhor visualização
                     ->modalHeading(fn ($record) => 'Receber: ' . $record->descricao)
-                    ->modalDescription('Confirme os detalhes da doação recebida')
+                    ->modalDescription('Registre os lotes recebidos com suas respectivas validades')
                     ->after(fn () => \Filament\Actions\Action::make('redirect')->url(IntencaoDoacaoResource::getUrl('index'))),
                 
                 Action::make('cancelar')
@@ -222,7 +243,6 @@ class IntencaoDoacaoResource extends Resource
     {
         return [
             'index' => Pages\ListIntencaoDoacaos::route('/'),
-            //'create' => Pages\CreateIntencaoDoacao::route('/create'),
             'edit' => Pages\EditIntencaoDoacao::route('/{record}/edit'),
         ];
     }

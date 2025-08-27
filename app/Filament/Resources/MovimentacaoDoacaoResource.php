@@ -41,7 +41,8 @@ class MovimentacaoDoacaoResource extends Resource
             ->columns([
                 TextColumn::make('created_at')
                     ->label('Data/Hora')
-                    ->dateTime('d/m/Y H:i'),
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
 
                 TextColumn::make('descricao')
                     ->label('Item'),
@@ -49,6 +50,25 @@ class MovimentacaoDoacaoResource extends Resource
 
                 TextColumn::make('quantidade')
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade),
+
+                TextColumn::make('data_validade')
+                    ->label('Validade')
+                    ->date('d/m/Y')
+                    ->sortable()
+                    ->color(fn ($state) => $state && now()->gt($state) ? 'danger' : 'success')
+                    ->description(fn ($record) => 
+                        !$record->data_validade ? '' : (
+                            ($dias = intval(now()->diffInDays($record->data_validade, false))) < 0 
+                                ? 'VENCIDO' 
+                                : ($dias == 0 
+                                    ? 'Vence hoje' 
+                                    : ($dias <= 7 
+                                        ? 'Vence em ' . $dias . ' dia' . ($dias > 1 ? 's' : '') 
+                                        : ''
+                                    )
+                                )
+                        )
+                    ),
 
                 TextColumn::make('status')
                     ->badge()
@@ -62,8 +82,9 @@ class MovimentacaoDoacaoResource extends Resource
                 TextColumn::make('nome_doador')
                     ->label('Nome Beneficiário')
                     ->formatStateUsing(fn ($state, $record) => 
-                        $record->status === 'Saida' ? $state : null
-                    ),
+                        $record->status === 'Saída' ? $state : ($record->status === 'Entrada' ? $record->nome_doador : null)
+                    )
+                    ->placeholder('-'),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -83,6 +104,22 @@ class MovimentacaoDoacaoResource extends Resource
                     ->query(function (Builder $query, array $data): Builder {
                         if ($data['value']) {
                             $query->where('descricao', 'like', '%' . $data['value'] . '%');
+                        }
+                        return $query;
+                    }),
+
+                Filter::make('data_validade')
+                    ->label('Validade')
+                    ->form([
+                        Forms\Components\DatePicker::make('validade_inicio'),
+                        Forms\Components\DatePicker::make('validade_fim'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (!empty($data['validade_inicio'])) {
+                            $query->whereDate('data_validade', '>=', Carbon::parse($data['validade_inicio'])->format('Y-m-d'));
+                        }
+                        if (!empty($data['validade_fim'])) {
+                            $query->whereDate('data_validade', '<=', Carbon::parse($data['validade_fim'])->format('Y-m-d'));
                         }
                         return $query;
                     }),
@@ -113,11 +150,12 @@ class MovimentacaoDoacaoResource extends Resource
                                 Column::make('quantidade')
                                     ->heading('Quantidade')
                                     ->formatStateUsing(fn ($record) => $record->quantidade . ' ' . $record->unidade),
+                                Column::make('data_validade')->heading('Data de Validade'),
                                 Column::make('status')->heading('Operação'),
                                 Column::make('nome_doador')
                                     ->heading('Nome Beneficiário')
                                     ->formatStateUsing(fn ($record) => 
-                                        $record->status === 'Saida' ? $record->nome_doador : null
+                                        $record->status === 'Saída' ? $record->nome_doador : ($record->status === 'Entrada' ? $record->nome_doador : null)
                                     ),
                             ])
                             ->askForFilename()
@@ -141,6 +179,15 @@ class MovimentacaoDoacaoResource extends Resource
                                 // Filtro por status
                                 if (!empty($filters['status']['value'])) {
                                     $query->where('status', $filters['status']['value']);
+                                }
+
+                                // Filtro por validade
+                                if (!empty($filters['data_validade']['validade_inicio'])) {
+                                    $query->whereDate('data_validade', '>=', Carbon::parse($filters['data_validade']['validade_inicio'])->format('Y-m-d'));
+                                }
+
+                                if (!empty($filters['data_validade']['validade_fim'])) {
+                                    $query->whereDate('data_validade', '<=', Carbon::parse($filters['data_validade']['validade_fim'])->format('Y-m-d'));
                                 }
 
                                 // Filtro por período
@@ -172,9 +219,10 @@ class MovimentacaoDoacaoResource extends Resource
                 $query->where('ong_destino_id', auth()->user()->ong->id)
                     ->orWhere('ong_origem_id', auth()->user()->ong->id);
             })
+            ->orderByRaw('CASE WHEN data_validade < NOW() THEN 0 ELSE 1 END')
+            ->orderBy('data_validade', 'asc')
             ->orderBy('created_at', 'desc');
     }
-
 
     public static function getPages(): array
     {
