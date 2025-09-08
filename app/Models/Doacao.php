@@ -42,4 +42,11 @@ class Doacao extends Model
     {
         return $this->belongsTo(Ong::class, 'ong_destino_id');
     }
+
+    public static function rules()
+    {
+        return [
+            'data_validade' => 'required|date|after_or_equal:today',
+        ];
+    }
 }

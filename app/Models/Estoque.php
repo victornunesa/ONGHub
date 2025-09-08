@@ -25,4 +25,11 @@ class Estoque extends Model
     {
         return $this->belongsTo(Ong::class);
     }
+
+    public static function rules()
+    {
+        return [
+            'data_validade' => 'required|date|after_or_equal:today',
+        ];
+    }
 }

@@ -116,8 +116,13 @@ class IntencaoDoacaoResource extends Resource
                                 Forms\Components\DatePicker::make('data_validade')
                                     ->label('Data de Validade')
                                     ->required()
-                                    ->minDate(now())
-                                    ->helperText('Informe a data de validade deste lote'),
+                                    ->minDate(today())
+                                    ->helperText(fn ($state) => 
+                                        $state === today()->format('Y-m-d') 
+                                            ? '⚠️ ATENÇÃO: Este item vence hoje!' 
+                                            : 'Informe a data de validade deste lote'
+                                    )
+                                    ->rule('after_or_equal:today'),
                             ])
                             ->defaultItems(1)
                             ->addActionLabel('Adicionar outro lote')
