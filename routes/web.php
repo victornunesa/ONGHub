@@ -13,6 +13,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 Route::get('/', function () {
     return view('welcome');
@@ -343,6 +344,54 @@ Route::middleware(['auth'])->group(function () {
 
         return redirect('/')->with('success', 'Sua conta foi inativada com sucesso.');
     })->name('perfil.inativar');
+
+    Route::get('/dashboard/estoque-dados', function () {
+        $ong = auth()->user()->ong;
+        $itemSelecionado = request()->query('item');
+
+        $mesesEstoqueChaves = collect(range(0, 5))->map(function ($i) {
+            return \Carbon\Carbon::now()->subMonths($i)->format('Y-m');
+        })->reverse()->values();
+
+        $mesesEstoqueFormatadosJS = $mesesEstoqueChaves->map(function ($mes) {
+            return \Carbon\Carbon::createFromFormat('Y-m', $mes)->translatedFormat('M/Y');
+        });
+
+        $query = DB::table('doacao')
+            ->select(
+                DB::raw("DATE_FORMAT(data_doacao, '%Y-%m') as mes"),
+                'status',
+                DB::raw('COUNT(*) as total')
+            )
+            ->whereIn('status', ['Entrada', 'Saida'])
+            ->whereBetween('data_doacao', [
+                \Carbon\Carbon::now()->subMonths(5)->startOfMonth(),
+                \Carbon\Carbon::now()->endOfMonth()
+            ]);
+
+        if ($itemSelecionado) {
+            $query->where('descricao', $itemSelecionado);
+        }
+
+        $movimentacoes = $query->groupBy('mes', 'status')->get();
+
+        $entradas = [];
+        $saidas = [];
+
+        foreach ($mesesEstoqueChaves as $mes) {
+            $entrada = $movimentacoes->first(fn($m) => $m->mes === $mes && strtolower(trim($m->status)) === 'entrada');
+            $saida = $movimentacoes->first(fn($m) => $m->mes === $mes && strtolower(trim($m->status)) === 'saida');
+
+            $entradas[] = $entrada->total ?? 0;
+            $saidas[] = $saida->total ?? 0;
+        }
+
+        return response()->json([
+            'labels' => $mesesEstoqueFormatadosJS,
+            'entradas' => $entradas,
+            'saidas' => $saidas,
+        ]);
+    })->name('dashboard.estoque.dados');
 
 
 });

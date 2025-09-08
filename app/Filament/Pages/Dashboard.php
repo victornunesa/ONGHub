@@ -121,6 +121,26 @@ class Dashboard extends Page
             ->orderBy('descricao')
             ->pluck('descricao');
 
+        // Gráfico de itens vencidos por mês
+        $mesesVencidos = collect(range(5, 0))->map(function ($i) {
+            return Carbon::now()->subMonths($i)->format('Y-m');
+        });
+
+        $dadosVencidos = DB::table('estoque')
+            ->selectRaw("DATE_FORMAT(data_validade, '%Y-%m') as mes, SUM(quantidade) as total")
+            ->whereBetween('data_validade', [
+                Carbon::now()->subMonths(5)->startOfMonth(),
+                Carbon::now()->endOfMonth(),
+            ])
+            ->where('data_validade', '<', Carbon::now())
+            ->groupBy('mes')
+            ->orderBy('mes')
+            ->pluck('total', 'mes')
+            ->toArray();
+
+        $labelsVencidos = $mesesVencidos->map(fn($mes) => Carbon::createFromFormat('Y-m', $mes)->translatedFormat('M/Y'));
+        $valoresVencidos = $mesesVencidos->map(fn($mes) => $dadosVencidos[$mes] ?? 0);
+
         return [
             'intencoesRecentes' => $intencoesRecentes,
             'totalIntencoes' => $totalIntencoes,
@@ -139,6 +159,9 @@ class Dashboard extends Page
 
             'itens' => $itens,
             'itemSelecionado' => $itemSelecionado,
+
+            'graficoVencidosLabels' => $labelsVencidos,
+            'graficoVencidosValores' => $valoresVencidos,
         ];
     }
 }
