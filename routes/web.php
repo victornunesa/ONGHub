@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\IntencaoDoacao;
 use App\Models\PedidoDoacao;
 use App\Rules\CnpjAtivo;
+use App\Services\BrasilApiService;
 use App\Services\ReceitaService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -59,6 +60,10 @@ Route::post('/reativar-conta', function () {
 
 
 Route::get('/cadastro', function () {
+    // $receitaService = new BrasilApiService();
+    // $consulta = $receitaService->consultarCnpj('86863016000143');
+    // var_dump($consulta['ativo']);
+    // return "oi";
     return view('user-registration');
 })->name('user.registration');
 

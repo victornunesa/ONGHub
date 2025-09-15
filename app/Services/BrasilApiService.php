@@ -1,4 +1,3 @@
-php artisan make:service BrasilApiService
 <?php
 
 namespace App\Services;

@@ -2,34 +2,34 @@
 
 namespace App\Rules;
 
-use App\Services\ReceitaService;
+use App\Services\BrasilApiService;
 use Illuminate\Contracts\Validation\Rule;
 
 class CnpjAtivo implements Rule
 {
-    protected $receitaService;
+    protected $brasilApiService;
     protected $mensagem;
 
     public function __construct()
     {
-        $this->receitaService = new ReceitaService();
+        $this->brasilApiService = new BrasilApiService();
     }
 
     public function passes($attribute, $value)
     {
         $cnpj = preg_replace('/[^0-9]/', '', $value);
 
-        // Primeiro valida o formato
+        // Primeiro valida o formato localmente
         if (!$this->validarFormatoCnpj($cnpj)) {
             $this->mensagem = 'CNPJ inválido';
             return false;
         }
 
-        // Consulta a situação na Receita
-        $consulta = $this->receitaService->consultarCnpj($cnpj);
+        // Consulta a BrasilAPI
+        $consulta = $this->brasilApiService->consultarCnpj($cnpj);
 
-        if (isset($consulta['erro'])) {
-            $this->mensagem = $consulta['erro'];
+        if (!$consulta['success']) {
+            $this->mensagem = $consulta['mensagem'] ?? 'Erro na consulta do CNPJ';
             return false;
         }
 
@@ -52,16 +52,11 @@ class CnpjAtivo implements Rule
             return false;
         }
 
-        // Validação dos dígitos verificadores
-        if (!$this->validarDigitos($cnpj)) {
+        // Verifica se não é uma sequência de números iguais
+        if (preg_match('/^(\d)\1+$/', $cnpj)) {
             return false;
         }
 
-        return true;
-    }
-
-    private function validarDigitos($cnpj)
-    {
         // Cálculo do primeiro dígito verificador
         $soma = 0;
         $pesos = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
