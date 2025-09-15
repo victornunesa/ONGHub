@@ -6,6 +6,8 @@ use App\Models\Ong;
 use App\Models\User;
 use App\Models\IntencaoDoacao;
 use App\Models\PedidoDoacao;
+use App\Rules\CnpjAtivo;
+use App\Services\ReceitaService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
@@ -64,7 +66,13 @@ Route::post('/cadastro', function () {
     try {
         $validated = request()->validate([
             'nome' => 'required|string|max:100',
-            'cnpj' => 'required|string|max:20|unique:ong,cnpj',
+            'cnpj' => [
+                    'required',
+                    'string',
+                    'max:20',
+                    'unique:ong,cnpj',
+                    new CnpjAtivo()
+            ],
             'email' => 'required|email|max:100|unique:users,email',
             'telefone' => 'required|string|max:15',
             'endereco' => 'required|string|max:255',
@@ -109,6 +117,7 @@ Route::post('/cadastro', function () {
         return redirect('/admin');
 
     } catch (\Exception $e) {
+        // dd($e->errors());
         logger()->error('Erro no cadastro:', ['error' => $e->getMessage()]);
         return back()->withInput()->withErrors(['error' => $e->getMessage()]);
     }
