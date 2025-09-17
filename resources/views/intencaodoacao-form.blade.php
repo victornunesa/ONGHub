@@ -2,194 +2,108 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Formulário de Intenção de Doação</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .item-doacao {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 15px;
-            border: 1px solid #dee2e6;
-        }
-        .remove-item {
-            cursor: pointer;
-            color: #dc3545;
-        }
-        .ong-card {
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .ong-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .ong-card.selected {
-            border: 2px solid #ffc107;
-            background-color: #fff8e1;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ asset('images/food-delivery.png') }}">
+    <title>ONGHub - Doar Alimentos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    @if(session('success'))
-        <div class="alert alert-success mt-4">
-            {{ session('success') }}
-        </div>
-    @endif
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card">
-                    <div class="card-header bg-warning text-white">
-                        <h4 class="mb-0">Formulário de Intenção de Doação de Alimentos</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="{{ route('intencao.store') }}" method="POST" id="formDoacao">
-                            @csrf
+<body class="min-h-screen bg-cover bg-center relative" 
+      style="background-image: url('https://source.unsplash.com/1600x900/?food,donation');">
 
-                            @if ($errors->any())
-                                <div class="alert alert-danger">
-                                    <ul class="mb-0">
-                                        @foreach ($errors->all() as $error)
-                                            <li>{{ $error }}</li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            @endif
-                            
-                            <h5 class="mb-4">Dados Pessoais</h5>
-                            <div class="mb-3">
-                                <label for="nome_solicitante" class="form-label">Nome</label>
-                                <input type="text" class="form-control" id="nome_solicitante" name="nome_solicitante" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="email_solicitante" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email_solicitante" name="email_solicitante" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="telefone_solicitante" class="form-label">Telefone</label>
-                                <input type="tel" class="form-control" id="telefone_solicitante" name="telefone_solicitante" required>
-                            </div>
+    
+      <!-- Background com imagem de doação -->
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" 
+         style="background-image: url('{{ asset('images/donation-pattern.png') }}');">
+         
+        <!-- Overlay para melhorar legibilidade -->
+        <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
 
-                            <hr class="my-4">
-                            
-                            <div class="mb-4">
-                                <label for="ong_desejada" class="form-label">Selecione a ONG para doação</label>
-                                <select class="form-select" name="ong_desejada" id="ong_desejada" required>
-                                    <option value="">Selecione uma ONG</option>
-                                    @foreach($ongs as $ong)
-                                        <option value="{{ $ong->id }}">{{ $ong->nome }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <!--<input type="hidden" name="ong_desejada" id="ong_desejada" required>-->
-                            
-                            <hr class="my-4">
-                            
-                            <h5 class="mb-4">Itens a serem doados</h5>
-                            <div id="itens-container">
-                                <!-- Primeiro item -->
-                                <div class="item-doacao">
-                                    <div class="row">
-                                        <div class="col-md-5 mb-3">
-                                            <label class="form-label">Descrição do Alimento</label>
-                                            <input type="text" class="form-control" name="itens[0][descricao]" required>
-                                        </div>
-                                        <div class="col-md-3 mb-3">
-                                            <label class="form-label">Quantidade</label>
-                                            <input type="number" class="form-control" name="itens[0][quantidade]" min="1" required>
-                                        </div>
-                                        <div class="col-md-3 mb-3">
-                                            <label class="form-label">Unidade</label>
-                                            <select class="form-select" name="itens[0][unidade]" required>
-                                                <option value="">Selecione...</option>
-                                                <option value="kg">Quilograma (kg)</option>
-                                                <option value="g">Grama (g)</option>
-                                                <option value="L">Litro (L)</option>
-                                                <option value="ml">Mililitro (ml)</option>
-                                                <option value="un">Unidade (un)</option>
-                                                <option value="cx">Caixa (cx)</option>
-                                                <option value="pct">Pacote (pct)</option>
-                                                <option value="lata">Lata</option>
-                                                <option value="saca">Saco</option>
-                                                <option value="dz">Dúzia (dz)</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-1 d-flex align-items-end mb-3">
-                                            <span class="remove-item" style="font-size: 1.5rem;">×</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <button type="button" id="adicionar-item" class="btn btn-outline-primary mb-4">
-                                + Adicionar outro item
-                            </button>
-                            
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-warning btn-lg">Registrar intenção de doação</button>
-                                <a href="{{ url('/') }}" class="btn btn-outline-secondary">Cancelar</a>
-                            </div>
-                        </form>
-                    </div>
+        <!-- Overlay escuro -->
+        <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+    </div>
+    
+
+    <div class="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div class="w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-2xl shadow-xl p-8 ">
+        
+            <!-- Logo/ícone -->
+            <div class="flex justify-center mb-4">
+                <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg text-white">
+                    <svg class="w-10 h-10 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
+                    </svg>
+                    <!-- <img src="/images/food-delivery.png" alt="Ícone ONGHub" class="w-10 h-10 object-contain"> -->
                 </div>
             </div>
-        </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('itens-container');
-            const addButton = document.getElementById('adicionar-item');
-            const ongCards = document.querySelectorAll('.ong-card');
-            const ongDesejadaInput = document.getElementById('ong_desejada');
-            let itemCount = 1;
+            <h2 class="text-3xl font-medium font-bold text-center mb-6 text-amber-600 animate-pulse">
+                Doação de Alimentos
+            </h2>
+            <style>
+            @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+            }
 
-            // Seleção de ONG
-            ongCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove a seleção de todas as ONGs
-                    ongCards.forEach(c => c.classList.remove('selected'));
-                    
-                    // Adiciona seleção à ONG clicada
-                    this.classList.add('selected');
-                    
-                    // Define o valor do input hidden
-                    ongDesejadaInput.value = this.dataset.ongId;
-                });
-            });
+            .animate-typing {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            animation: typing 4s steps(40, end);
+            }
+            </style>
 
-            // Validação do formulário - verifica se uma ONG foi selecionada
-            document.getElementById('formDoacao').addEventListener('submit', function(e) {
-                if (!ongDesejadaInput.value) {
-                    e.preventDefault();
-                    alert('Por favor, selecione uma ONG para a doação.');
-                    return false;
-                }
-            });
+            <!-- Mensagens de erro -->
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    <ul class="list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-            // Adicionar novo item
-            addButton.addEventListener('click', function() {
-                const newItem = document.createElement('div');
-                newItem.className = 'item-doacao';
-                newItem.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-5 mb-3">
-                            <label class="form-label">Descrição</label>
-                            <input type="text" class="form-control" name="itens[${itemCount}][descricao]" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Quantidade</label>
-                            <input type="number" step="0.1" class="form-control" name="itens[${itemCount}][quantidade]" min="0.1" required>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Unidade</label>
-                            <select class="form-select" name="itens[${itemCount}][unidade]" required>
-                                <option value="">Selecione...</option>
+            <form action="{{ route('intencao.store') }}" method="POST" id="formDoacao" class="space-y-6">
+                @csrf
+
+                <!-- Dados pessoais -->
+                <div class="grid md:grid-cols-3 gap-4">
+                    <input type="text" name="nome_solicitante" placeholder="Nome*" 
+                           class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none" required>
+
+                    <input type="email" name="email_solicitante" placeholder="E-mail*" 
+                           class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none" required>
+
+                    <input type="tel" name="telefone_solicitante" placeholder="Telefone*" 
+                           class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none" required>
+                </div>
+
+                <!-- Seleção ONG -->
+                <div>
+                    <label class="block mb-2 font-medium text-gray-700">Selecione a ONG</label>
+                    <select name="ong_desejada" id="ong_desejada" required
+                            class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none">
+                        <option value="">Selecione uma ONG</option>
+                        @foreach($ongs as $ong)
+                            <option value="{{ $ong->id }}">{{ $ong->nome }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <!-- Itens -->
+                <div id="itens-container" class="space-y-4">
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl relative">
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <input type="text" name="itens[0][descricao]" placeholder="Descrição do alimento*" 
+                                   class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none" required>
+
+                            <input type="number" name="itens[0][quantidade]" placeholder="Quantidade*" min="1" 
+                                   class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none" required>
+
+                            <select name="itens[0][unidade]" required
+                                    class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none">
+                                <option value="">Unidade...</option>
                                 <option value="kg">Quilograma (kg)</option>
                                 <option value="g">Grama (g)</option>
                                 <option value="L">Litro (L)</option>
@@ -202,10 +116,61 @@
                                 <option value="dz">Dúzia (dz)</option>
                             </select>
                         </div>
-                        <div class="col-md-1 d-flex align-items-end mb-3">
-                            <span class="remove-item">×</span>
-                        </div>
+                        <button type="button" class="absolute top-2 right-2 text-red-500 font-bold remove-item">×</button>
                     </div>
+                </div>
+
+                <!-- Botão adicionar item -->
+                <button type="button" id="adicionar-item" 
+                        class="w-full py-2 px-4 rounded-xl border border-amber-400 text-amber-600 font-medium hover:bg-amber-50 hover:scale-105 transition">
+                    + Adicionar outro item
+                </button>
+
+                <!-- Botões finais -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <button type="submit" 
+                            class="w-full py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-semibold shadow-md hover:scale-105 transition">
+                        Registrar Doação
+                    </button>
+                    <a href="{{ url('/') }}" class="w-full py-2 rounded-xl border-gray-200 text-black font-medium text-center transition bg-gray-200 hover:bg-red-500 hover:scale-105 hover:text-white shadow-lg hover:shadow-xl">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('itens-container');
+            const addButton = document.getElementById('adicionar-item');
+            let itemCount = 1;
+
+            addButton.addEventListener('click', function() {
+                const newItem = document.createElement('div');
+                newItem.className = 'p-4 bg-gray-50 border border-gray-200 rounded-xl relative';
+                newItem.innerHTML = `
+                    <div class="grid md:grid-cols-3 gap-4">
+                        <input type="text" name="itens[${itemCount}][descricao]" placeholder="Descrição do alimento*" 
+                               class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none" required>
+                        <input type="number" name="itens[${itemCount}][quantidade]" placeholder="Quantidade*" min="1" 
+                               class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none" required>
+                        <select name="itens[${itemCount}][unidade]" required
+                                class="w-full p-3 rounded-xl border border-gray-300 focus:border-amber-500 focus:ring focus:ring-amber-200 outline-none">
+                            <option value="">Unidade...</option>
+                            <option value="kg">Quilograma (kg)</option>
+                            <option value="g">Grama (g)</option>
+                            <option value="L">Litro (L)</option>
+                            <option value="ml">Mililitro (ml)</option>
+                            <option value="un">Unidade (un)</option>
+                            <option value="cx">Caixa (cx)</option>
+                            <option value="pct">Pacote (pct)</option>
+                            <option value="lata">Lata</option>
+                            <option value="saca">Saco</option>
+                            <option value="dz">Dúzia (dz)</option>
+                        </select>
+                    </div>
+                    <button type="button" class="absolute top-2 right-2 text-red-500 font-bold remove-item">×</button>
                 `;
                 container.appendChild(newItem);
                 itemCount++;
@@ -214,8 +179,8 @@
             // Remover item
             container.addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-item')) {
-                    if (document.querySelectorAll('.item-doacao').length > 1) {
-                        e.target.closest('.item-doacao').remove();
+                    if (document.querySelectorAll('#itens-container > div').length > 1) {
+                        e.target.closest('div').remove();
                     } else {
                         alert('Você precisa ter pelo menos um item de doação.');
                     }
