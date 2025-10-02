@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class PedidoDoacao extends Model
 {
+    use HasFactory;
+
     protected $table = 'pedido_doacao';
 
     protected $casts = [
