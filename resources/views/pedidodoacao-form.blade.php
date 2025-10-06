@@ -46,7 +46,7 @@
                     </g>
                 </svg>
                 <!-- <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/>
                 </svg> -->
             </div>
@@ -64,6 +64,16 @@
             </div>
         @endif
 
+        @if($errors->any())
+            <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
+                <ul class="mb-0">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <!-- Formulário -->
         <form action="{{ route('doacao.store') }}" method="POST" id="formDoacao" class="space-y-6">
             @csrf
@@ -71,14 +81,14 @@
             <!-- Dados pessoais -->
             <h2 class="text-xl font-semibold text-gray-700">Dados Pessoais:</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" name="nome_solicitante" placeholder="Nome*" 
+                <input type="text" name="nome_solicitante" placeholder="Nome*"
                     class="w-full p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
-                <input type="email" name="email_solicitante" placeholder="E-mail*" 
+                <input type="email" name="email_solicitante" placeholder="E-mail*"
                     class="w-full p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
-                <input type="text" name="cpf" id="cpf" maxlength="14" placeholder="CPF* (000.000.000-00)" 
+                <input type="text" name="cpf" id="cpf" maxlength="14" placeholder="CPF* (000.000.000-00)"
                     oninput="mascararCPF(this)"
                     class="w-full p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
-                <input type="tel" name="telefone_solicitante" placeholder="Telefone*" 
+                <input type="tel" name="telefone_solicitante" placeholder="Telefone*"
                     class="w-full p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
             </div>
 
@@ -90,11 +100,11 @@
                 <!-- Item inicial -->
                 <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl item-pedidodoacao">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <input type="text" name="itens[0][descricao]" placeholder="Descrição*" 
+                        <input type="text" name="itens[0][descricao]" placeholder="Descrição*"
                             class="p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
                         <input type="number" name="itens[0][quantidade]" placeholder="Quantidade*" min="1"
                             class="p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
-                        <select name="itens[0][unidade]" 
+                        <select name="itens[0][unidade]"
                             class="p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
                             <option value="">Unidade...</option>
                             <option value="kg">Quilograma (kg)</option>
@@ -114,14 +124,14 @@
             </div>
 
             <!-- Botão adicionar -->
-            <button type="button" id="adicionar-item" 
+            <button type="button" id="adicionar-item"
                 class="w-full py-2 rounded-xl border-2 border-pink-400 text-pink-600 font-semibold hover:scale-105 hover:bg-pink-50 transition">
                 + Adicionar outro item
             </button>
 
             <!-- Botões -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
-                <button type="submit" 
+                <button type="submit"
                     class="bg-gradient-to-r from-red-500 to-pink-500 text-white py-2 rounded-xl font-semibold shadow-md hover:opacity-90 hover:scale-105 transition">
                     Confirmar Solicitação
                 </button>
@@ -152,11 +162,11 @@
                 newItem.className = 'p-4 bg-gray-50 border border-gray-200 rounded-xl item-pedidodoacao';
                 newItem.innerHTML = `
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <input type="text" name="itens[${itemCount}][descricao]" placeholder="Descrição*" 
+                        <input type="text" name="itens[${itemCount}][descricao]" placeholder="Descrição*"
                             class="p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
                         <input type="number" name="itens[${itemCount}][quantidade]" placeholder="Quantidade*" min="1"
                             class="p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
-                        <select name="itens[${itemCount}][unidade]" 
+                        <select name="itens[${itemCount}][unidade]"
                             class="p-3 rounded-xl border border-gray-300 focus:border-pink-500 focus:ring focus:ring-pink-200 outline-none" required>
                             <option value="">Unidade...</option>
                             <option value="kg">Quilograma (kg)</option>
