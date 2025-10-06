@@ -168,7 +168,7 @@ Route::get('/doacao', function () {
 // Adicione esta rota para processar o formulário
 Route::post('/doacao', function () {
 
-    $codigo = 'PD-' . now()->format('Ymd') . '-' . strtoupper(Str::random(6));
+    $codigo = 'PD-' . now()->format('Ymd-Hisv') . '-' . strtoupper(Str::random(4));
 
     $validated = request()->validate([
         'nome_solicitante' => 'required|string|max:100',
