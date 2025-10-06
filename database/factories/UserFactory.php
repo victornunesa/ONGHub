@@ -43,4 +43,11 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function withOng($ongId): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'ong_id' => $ongId,
+        ]);
+    }
 }

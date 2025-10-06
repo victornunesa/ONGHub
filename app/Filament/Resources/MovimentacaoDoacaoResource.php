@@ -82,7 +82,8 @@ class MovimentacaoDoacaoResource extends Resource
                 TextColumn::make('nome_doador')
                     ->label('Nome Beneficiário')
                     ->formatStateUsing(fn ($state, $record) => 
-                        $record->status === 'Saída' ? $state : ($record->status === 'Entrada' ? $record->nome_doador : null)
+                        $record->status === 'Entrada' ? null :  
+                        ($record->status === 'Saída' ? $state : $record->nome_doador)
                     )
                     ->placeholder('-'),
             ])
