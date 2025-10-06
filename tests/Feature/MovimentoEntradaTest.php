@@ -7,18 +7,33 @@ use App\Models\Doacao;
 use App\Models\Estoque;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 uses(RefreshDatabase::class);
 
-it('confirma recebimento de doação e gera movimentação de entrada', function () {
+it('CTU05 – Função de movimentação de estoque (entrada)', function () {
+    $output = new ConsoleOutput();
+
+    $output->writeln("<info>🚀 Iniciando CTU05 – Função de movimentação de estoque (entrada)...</info>");
+    $output->writeln("<comment>📋 Objetivo: validar que, ao confirmar o recebimento da doação, o sistema cria a movimentação e atualiza o estoque.</comment>");
+
     // 1. Criar ONG e usuário logado
     $ong = Ong::factory()->create();
     $user = User::factory()->withOng($ong->id)->create();
     $this->actingAs($user);
+    $output->writeln("<info>🏢 ONG criada (ID: {$ong->id}) e usuário autenticado (ID: {$user->id}).</info>");
 
     // 2. Criar intenção de doação (status registrada)
     $intencao = IntencaoDoacao::factory()->withOng($ong->id)->withStatus('registrada')
                                 ->withQuantidade(5)->create();
+
+    $output->writeln("<comment>🎯 Intenção de doação criada (ID: {$intencao->id})</comment>");
+    $output->writeln("<comment>   • Item: {$intencao->descricao}</comment>");
+    $output->writeln("<comment>   • Quantidade: {$intencao->quantidade} {$intencao->unidade}</comment>");
+    $output->writeln("<comment>   • Status inicial: {$intencao->status}</comment>");
+
+    // 3️⃣ Simular recebimento e gerar movimentação
+    $output->writeln("<info>📦 Gerando movimentação de entrada...</info>");
 
     // 3. Simular recebimento
 
@@ -38,6 +53,8 @@ it('confirma recebimento de doação e gera movimentação de entrada', function
         'ong_origem_id' => $ong->id,
     ]);
 
+    $output->writeln("<fg=yellow>✅ Doação registrada (ID: {$doacao->id}) com status '{$doacao->status}'.</>");
+
     // // Criar estoque
     $estoque = Estoque::updateOrCreate(
         [
@@ -52,11 +69,19 @@ it('confirma recebimento de doação e gera movimentação de entrada', function
         ]
     );
     $estoque->increment('quantidade', $intencao->quantidade);
+
+    $output->writeln("<comment>📊 Estoque atualizado:</comment>");
+    $output->writeln("<comment>   • Item: {$estoque->nome_item}</comment>");
+    $output->writeln("<comment>   • Quantidade atual: {$estoque->quantidade}</comment>");
+    $output->writeln("<comment>   • Validade: {$estoque->data_validade->format('d/m/Y')}</comment>");
+
     // // Atualizar intenção
     $intencao->update([
         'status' => 'Recebida',
         'data_validade' => now()->addDay()
     ]);
+
+    $output->writeln("<info>🔁 Intenção atualizada para status: '{$intencao->fresh()->status}'.</info>");
 
     // ✅ Verificações
     expect(Doacao::count())->toBe(1);
@@ -64,4 +89,6 @@ it('confirma recebimento de doação e gera movimentação de entrada', function
     expect($intencao->fresh()->status)->toBe('Recebida');
     expect($estoque->quantidade)->toBe(5);
     expect($estoque->data_validade->isFuture())->toBeTrue();
+
+    $output->writeln("<fg=green>🎉 CTU05 concluído com sucesso — movimentação e estoque validados!</>");
 });
