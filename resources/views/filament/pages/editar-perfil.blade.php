@@ -1,13 +1,22 @@
+@push('styles')
+    <style>
+        /* Garante cor laranja no modo escuro */
+        html label,
+        html h3 {
+            color: #fb923c !important; /* orange-400 */
+        }
+    </style>
+@endpush
+
 <x-filament::page>
     <x-filament::card class="max-w-3xl mx-auto space-y-6">
-
-
         <form wire:submit.prevent="submit" class="space-y-8">
-            {{-- Campos principais agrupados com espaçamento --}}
+            {{-- Campos principais --}}
             <div class="space-y-6">
+
                 {{-- Nome da ONG --}}
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nome da ONG</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-orange-400 mb-1">Nome da ONG</label>
                     <input
                         type="text"
                         wire:model.defer="nome"
@@ -19,7 +28,7 @@
 
                 {{-- CNPJ --}}
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">CNPJ</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-orange-400 mb-1">CNPJ</label>
                     <input
                         type="text"
                         wire:model.defer="cnpj"
@@ -31,7 +40,7 @@
 
                 {{-- E-mail --}}
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">E-mail</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-orange-400 mb-1">E-mail</label>
                     <input
                         type="email"
                         wire:model.defer="email"
@@ -43,7 +52,7 @@
 
                 {{-- Telefone --}}
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Telefone</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-orange-400 mb-1">Telefone</label>
                     <input
                         type="text"
                         wire:model.defer="telefone"
@@ -53,9 +62,9 @@
                     />
                 </div>
 
-                {{-- Endereço --}}
+                {{-- Endere�o --}}
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Endereço Completo</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-orange-400 mb-1">Endereço Completo</label>
                     <textarea
                         wire:model.defer="endereco"
                         rows="3"
@@ -66,14 +75,14 @@
                 </div>
             </div>
 
-            <hr class="my-8 border-t border-gray-200" />
+            <hr class="my-8 border-t border-gray-200 dark:border-gray-700" />
 
             {{-- Alterar Senha --}}
-            <h3 class="text-lg font-semibold mb-4">Alterar Senha</h3>
+            <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-orange-400">Alterar Senha</h3>
 
             <div class="space-y-6">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Senha Atual</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-orange-400 mb-1">Senha Atual</label>
                     <input
                         type="password"
                         wire:model.defer="current_password"
@@ -83,7 +92,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nova Senha</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-orange-400 mb-1">Nova Senha</label>
                     <input
                         type="password"
                         wire:model.defer="new_password"
@@ -93,7 +102,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Confirme a Nova Senha</label>
+                    <label class="block text-sm font-semibold text-gray-700 dark:text-orange-400 mb-1">Confirme a Nova Senha</label>
                     <input
                         type="password"
                         wire:model.defer="new_password_confirmation"
@@ -103,11 +112,11 @@
                 </div>
             </div>
 
-            <p class="text-sm text-gray-500 mt-3">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
                 A nova senha deve conter pelo menos 8 caracteres, letras maiúsculas e minúsculas, números e símbolos.
             </p>
 
-            {{-- Botões --}}
+            {{-- Bot�es --}}
             <div class="flex justify-end mt-8 gap-4">
                 <x-filament::button type="submit" color="info">
                     Salvar Alterações
@@ -116,11 +125,14 @@
         </form>
     </x-filament::card>
 
-    <hr class="my-6 border-t border-gray-200" />
+    <hr class="my-6 border-t border-gray-200 dark:border-gray-700" />
 
+    {{-- Inativar Conta --}}
     <x-filament::card>
-        <h3 class="text-lg font-bold">Inativar Conta</h3>
-        <p class="text-sm text-gray-500 mb-2">Você não poderá mais acessar até que um administrador reative sua conta.</p>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-orange-400">Inativar Conta</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            Você não poderá mais acessar até que um administrador reative sua conta.
+        </p>
 
         <form method="POST" action="{{ route('perfil.inativar') }}" onsubmit="return confirm('Deseja realmente inativar sua conta?')">
             @csrf
@@ -129,11 +141,14 @@
         </form>
     </x-filament::card>
 
-    <hr class="my-6 border-t border-gray-200" />
+    <hr class="my-6 border-t border-gray-200 dark:border-gray-700" />
 
+    {{-- Excluir Conta --}}
     <x-filament::card>
-        <h3 class="text-lg font-bold">Excluir Conta</h3>
-        <p class="text-sm text-gray-500 mb-2">Esta ação é permanente. Sua conta será apagada definitivamente.</p>
+        <h3 class="text-lg font-bold text-gray-900 dark:text-orange-400">Excluir Conta</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+            Esta ação é permanente. Sua conta será apagada definitivamente.
+        </p>
 
         <form method="POST" action="{{ route('perfil.deletar') }}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta?')">
             @csrf
@@ -142,5 +157,3 @@
         </form>
     </x-filament::card>
 </x-filament::page>
-
-
