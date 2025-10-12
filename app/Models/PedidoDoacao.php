@@ -32,4 +32,15 @@ class PedidoDoacao extends Model
 
         return $restante;
     }
+
+    public static function rules()
+    {
+        return [
+            'nome_solicitante' => 'required|string|max:100',
+            'email_solicitante' => 'required|email',
+            'telefone_solicitante' => 'required|string|max:20',
+            'cpf' => 'required|cpf',
+            'quantidade' => 'required|numeric|min:1',
+        ];
+    }
 }

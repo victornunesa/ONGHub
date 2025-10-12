@@ -8,10 +8,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 uses(RefreshDatabase::class);
 
-it('CTU04 – Validação de data de validade', function () {
+it('CTF10 – Validação de data de validade', function () {
     $output = new ConsoleOutput();
 
-    $output->writeln("<info>🚀 Iniciando CTU04 – Validação de data de validade...</info>");
+    $output->writeln("<info>🚀 Iniciando CTF10 – Validação de data de validade...</info>");
     $output->writeln("<comment>📋 Cenário: Tentar cadastrar item com data de validade anterior à atual.</comment>");
 
     // Pré-condição: nenhuma
@@ -46,5 +46,5 @@ it('CTU04 – Validação de data de validade', function () {
     expect($validator->fails())->toBeTrue();
     expect($validator->errors()->has('data_validade'))->toBeTrue();
 
-    $output->writeln("<info>🏁 CTU04 concluído com sucesso.</info>");
+    $output->writeln("<info>🏁 CTF10 concluído com sucesso.</info>");
 });

@@ -26,7 +26,7 @@ class IntencaoDoacaoFactory extends Factory
             'tipo' => 'Alimentos',
             'quantidade' => $this->faker->numberBetween(1, 25),
             'unidade' => $this->faker->randomElement(['kg', 'lata', 'litro']),
-            'status' => 'registrada',
+            'status' => 'Registrada',
             'data_pedido' => now()
         ];
     }
@@ -44,7 +44,7 @@ class IntencaoDoacaoFactory extends Factory
     {
         return $this->state(function () use ($status) {
             return [
-                'status' => $status ?? 'registrada'
+                'status' => $status ?? 'Registrada'
             ];
         });
     }

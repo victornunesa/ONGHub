@@ -11,10 +11,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 uses(RefreshDatabase::class);
 
-it('CTU05 – Função de movimentação de estoque (entrada)', function () {
+it('CTF11 – Função de movimentação de estoque (entrada)', function () {
     $output = new ConsoleOutput();
 
-    $output->writeln("<info>🚀 Iniciando CTU05 – Função de movimentação de estoque (entrada)...</info>");
+    $output->writeln("<info>🚀 Iniciando CTF11 – Função de movimentação de estoque (entrada)...</info>");
     $output->writeln("<comment>📋 Objetivo: validar que, ao confirmar o recebimento da doação, o sistema cria a movimentação e atualiza o estoque.</comment>");
 
     // 1. Criar ONG e usuário logado
@@ -90,5 +90,5 @@ it('CTU05 – Função de movimentação de estoque (entrada)', function () {
     expect($estoque->quantidade)->toBe(5);
     expect($estoque->data_validade->isFuture())->toBeTrue();
 
-    $output->writeln("<fg=green>🎉 CTU05 concluído com sucesso — movimentação e estoque validados!</>");
+    $output->writeln("<fg=green>🎉 CTF11 concluído com sucesso — movimentação e estoque validados!</>");
 });

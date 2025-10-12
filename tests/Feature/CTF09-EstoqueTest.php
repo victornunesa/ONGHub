@@ -7,7 +7,7 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 uses(RefreshDatabase::class);
 
-it('CTU03 - Estoque Adicionar 5 itens', function () {
+it('CTF09 - Estoque Adicionar 5 itens', function () {
     $output = new ConsoleOutput();
     $output->writeln("<info>🚀 Iniciando teste de adição de itens no estoque...</info>");
 

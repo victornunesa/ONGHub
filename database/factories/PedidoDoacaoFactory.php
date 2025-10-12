@@ -23,7 +23,7 @@ class PedidoDoacaoFactory extends Factory
             'telefone_solicitante' => $this->faker->phoneNumber(),
             'descricao' => $this->faker->randomElement(['Arroz', 'Feijão', 'Leite', 'Macarrão']),
             'quantidade' => $this->faker->randomFloat(2, 1, 50), // entre 1 e 50 unidades
-            'status' => $this->faker->randomElement(['registrado', 'atendido', 'cancelado']),
+            'status' => 'Registrada',
             'data_pedido' => now(),
             'tipo' => $this->faker->randomElement(['Alimentos', 'Higiene', 'Limpeza']),
             'unidade' => $this->faker->randomElement(['kg', 'l', 'unidade', 'pacote']),

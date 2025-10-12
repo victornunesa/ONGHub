@@ -2,20 +2,18 @@
 
 use App\Models\Ong;
 use App\Models\User;
-use App\Models\IntencaoDoacao;
 use App\Models\Doacao;
 use App\Models\Estoque;
 use App\Models\PedidoDoacao;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
 uses(RefreshDatabase::class);
 
-it('CTU06 – Função de movimentação de estoque (saída)', function () {
+it('CTF12 – Função de movimentação de estoque (saída)', function () {
     $output = new ConsoleOutput();
 
-    $output->writeln("<info>🚀 Iniciando CTU06 – Função de movimentação de estoque (saída)...</info>");
+    $output->writeln("<info>🚀 Iniciando CTF12 – Função de movimentação de estoque (saída)...</info>");
     $output->writeln("<comment>📋 Objetivo: validar a retirada de itens do estoque e registro da movimentação de saída.</comment>");
 
     // 1. Criar ONG e usuário logado
@@ -75,6 +73,6 @@ it('CTU06 – Função de movimentação de estoque (saída)', function () {
     expect(Doacao::first()->status)->toBe('Saida');
     expect($pedidoDoacao->fresh()->status)->toBe('Doação completa');
 
-    $output->writeln("<fg=green>🎉 CTU06 concluído com sucesso — movimentação de saída validada!</>");
+    $output->writeln("<fg=green>🎉 CTF12 concluído com sucesso — movimentação de saída validada!</>");
 
 });
