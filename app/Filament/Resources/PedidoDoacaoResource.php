@@ -80,7 +80,7 @@ class PedidoDoacaoResource extends Resource
                 ->icon('heroicon-m-hand-thumb-up')
                 ->visible(fn ($record) => $record->status !== 'Doação completa')
                 ->fillForm(fn ($record) => [
-                    'quantidade_solicitada_pedido' => $record->quantidade,
+                    'quantidade_solicitada_pedido' => $record->quantidade_necessaria,
                 ])
                 ->record(fn ($record) => $record)
                 ->form([
