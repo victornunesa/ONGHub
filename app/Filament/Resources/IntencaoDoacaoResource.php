@@ -57,7 +57,11 @@ class IntencaoDoacaoResource extends Resource
 
                 TextColumn::make('quantidade')
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
-                    ->label('Quantidade'),
+                    ->label('Qtd a receber'),
+
+                TextColumn::make('quantidade_recebida')
+                    ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
+                    ->label('Qtd recebida'),
 
                 TextColumn::make('status')
                     ->badge()
@@ -65,8 +69,8 @@ class IntencaoDoacaoResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'Registrada' => 'gray',
                         'Recebida' => 'success',
-                        'Cancelada' => 'danger',
-                        default => 'warning'
+                        'Recebida em parte' => 'warning',
+                        'Cancelada' => 'danger'
                     }),
 
                 TextColumn::make('data_pedido')
@@ -148,20 +152,7 @@ class IntencaoDoacaoResource extends Resource
                             }
 
                             try {
-                                // $totalQuantidadeRecebida = 0;
-                                $totalQuantidadeRecebida = collect($data['itens_recebidos'])
-                                    ->sum(fn ($item) => $item['quantidade_recebida']);
-
-                                if ($totalQuantidadeRecebida !== $record->quantidade) {
-                                    Notification::make()
-                                        ->title('Erro na validação de quantidade')
-                                        ->body("A soma total dos itens recebidos ({$totalQuantidadeRecebida}) não corresponde à quantidade esperada ({$record->quantidade}).")
-                                        ->danger()
-                                        ->persistent() // mantém até o usuário fechar
-                                        ->send();
-
-                                    throw new Halt; // interrompe o fluxo sem quebrar a execução
-                                }
+                                $totalQuantidadeRecebida = 0;
 
                                 foreach ($data['itens_recebidos'] as $item) {
                                     // Padroniza o nome do item: trim, lowercase, capitalize first letter
@@ -195,6 +186,11 @@ class IntencaoDoacaoResource extends Resource
                                         'data_atualizacao' => now(),
                                         'quantidade_solicitada' => 0,
                                     ]);
+                                }
+
+                                // Atualiza status do pedido
+                                if ($totalQuantidadeRecebida < $record->quantidade) {
+                                    $record->update(['status' => 'Recebida em parte']);
                                 }
 
                                 // 3. Atualizar status da intenção

@@ -26,4 +26,11 @@ class IntencaoDoacao extends Model
     {
         return $this->hasMany(Doacao::class, 'intencao_id');
     }
+
+    public function getQuantidadeRecebidaAttribute(): string
+    {
+        $totalDoado = $this->doacoes()->sum('quantidade');
+
+        return $totalDoado;
+    }
 }
