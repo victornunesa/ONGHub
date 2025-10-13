@@ -9,6 +9,7 @@ use App\Models\PedidoDoacao;
 use App\Rules\CnpjAtivo;
 use App\Services\BrasilApiService;
 use App\Services\ReceitaService;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
@@ -72,11 +73,11 @@ Route::post('/cadastro', function () {
         $validated = request()->validate([
             'nome' => 'required|string|max:100',
             'cnpj' => [
-                    'required',
-                    'string',
-                    'max:20',
-                    'unique:ong,cnpj',
-                    new CnpjAtivo()
+                'required',
+                'string',
+                'max:20',
+                'unique:ong,cnpj',
+                new CnpjAtivo(),
             ],
             'email' => 'required|email|max:100|unique:users,email',
             'telefone' => 'required|string|max:15',
@@ -84,16 +85,9 @@ Route::post('/cadastro', function () {
             'password' => [
                 'required',
                 'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
+                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
             ],
         ]);
-
-        // Debug: Mostra os dados validados
-        logger()->info('Dados validados:', $validated);
 
         $ong = Ong::create([
             'nome' => $validated['nome'],
@@ -101,10 +95,8 @@ Route::post('/cadastro', function () {
             'email' => $validated['email'],
             'telefone' => $validated['telefone'],
             'endereco' => $validated['endereco'],
-            'status' => 'ativo'
+            'status' => 'ativo',
         ]);
-
-        logger()->info('ONG criada:', $ong->toArray());
 
         $user = User::create([
             'name' => $validated['nome'],
@@ -112,15 +104,14 @@ Route::post('/cadastro', function () {
             'password' => Hash::make($validated['password']),
             'tipo' => 'ong',
             'status' => 'ativo',
-            'ong_id' => $ong->id
+            'ong_id' => $ong->id,
         ]);
 
-        logger()->info('Usuário criado:', $user->toArray());
-
-        //auth()->login($user); // Autentica o usuário
         Auth::login($user);
         return redirect('/admin');
 
+    } catch (ValidationException $e) {
+        throw $e;
     } catch (\Exception $e) {
         // dd($e->errors());
         logger()->error('Erro no cadastro:', ['error' => $e->getMessage()]);
