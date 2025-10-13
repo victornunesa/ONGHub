@@ -18,6 +18,8 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Filament\Support\Exceptions\Halt;
+use Filament\Forms\Set;
 
 class IntencaoDoacaoResource extends Resource
 {
@@ -44,7 +46,7 @@ class IntencaoDoacaoResource extends Resource
                 TextColumn::make('email_solicitante')
                     ->label('E-mail')
                     ->searchable(),
-                    
+
                 TextColumn::make('descricao')
                     ->label('Item')
                     ->searchable()
@@ -52,11 +54,11 @@ class IntencaoDoacaoResource extends Resource
                     ->tooltip(function (TextColumn $column) {
                         return $column->getState();
                     }),
-                    
+
                 TextColumn::make('quantidade')
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
                     ->label('Quantidade'),
-                    
+
                 TextColumn::make('status')
                     ->badge()
                     ->searchable()
@@ -66,7 +68,7 @@ class IntencaoDoacaoResource extends Resource
                         'Cancelada' => 'danger',
                         default => 'warning'
                     }),
-                    
+
                 TextColumn::make('data_pedido')
                     ->date('d/m/Y')
                     ->sortable(),
@@ -99,7 +101,8 @@ class IntencaoDoacaoResource extends Resource
                                 Forms\Components\TextInput::make('quantidade_recebida')
                                     ->label('Quantidade Recebida')
                                     ->numeric()
-                                    ->minValue(0.1)
+                                    ->minValue(1)
+                                    ->maxValue(fn ($record) => $record->quantidade)
                                     ->required(),
 
                                 Forms\Components\Select::make('unidade_recebida')
@@ -117,9 +120,9 @@ class IntencaoDoacaoResource extends Resource
                                     ->label('Data de Validade')
                                     ->required()
                                     ->minDate(today())
-                                    ->helperText(fn ($state) => 
-                                        $state === today()->format('Y-m-d') 
-                                            ? '⚠️ ATENÇÃO: Este item vence hoje!' 
+                                    ->helperText(fn ($state) =>
+                                        $state === today()->format('Y-m-d')
+                                            ? '⚠️ ATENÇÃO: Este item vence hoje!'
                                             : 'Informe a data de validade deste lote'
                                     )
                                     ->rule('after_or_equal:today'),
@@ -145,8 +148,21 @@ class IntencaoDoacaoResource extends Resource
                             }
 
                             try {
-                                $totalQuantidadeRecebida = 0;
-                                
+                                // $totalQuantidadeRecebida = 0;
+                                $totalQuantidadeRecebida = collect($data['itens_recebidos'])
+                                    ->sum(fn ($item) => $item['quantidade_recebida']);
+
+                                if ($totalQuantidadeRecebida !== $record->quantidade) {
+                                    Notification::make()
+                                        ->title('Erro na validação de quantidade')
+                                        ->body("A soma total dos itens recebidos ({$totalQuantidadeRecebida}) não corresponde à quantidade esperada ({$record->quantidade}).")
+                                        ->danger()
+                                        ->persistent() // mantém até o usuário fechar
+                                        ->send();
+
+                                    throw new Halt; // interrompe o fluxo sem quebrar a execução
+                                }
+
                                 foreach ($data['itens_recebidos'] as $item) {
                                     // Padroniza o nome do item: trim, lowercase, capitalize first letter
                                     $nomeItemPadronizado = ucfirst(strtolower(trim($item['nome_item'])));
@@ -208,7 +224,7 @@ class IntencaoDoacaoResource extends Resource
                     ->modalHeading(fn ($record) => 'Receber: ' . $record->descricao)
                     ->modalDescription('Registre os lotes recebidos com suas respectivas validades')
                     ->after(fn () => \Filament\Actions\Action::make('redirect')->url(IntencaoDoacaoResource::getUrl('index'))),
-                
+
                 Action::make('cancelar')
                     ->label('Cancelar')
                     ->icon('heroicon-o-x-circle')
@@ -255,13 +271,13 @@ class IntencaoDoacaoResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-        
+
         if (auth()->check() && auth()->user()->ong) {
             $query->where('ong_desejada', auth()->user()->ong->id);
         } else {
             $query->whereNull('id');
         }
-        
+
         return $query;
     }
 }
