@@ -14,7 +14,7 @@
         }
         .animate-float { animation: float 3s ease-in-out infinite; }
         .animate-float-delay { animation: float 3s ease-in-out infinite 1.5s; }
-        
+
         /* Gradiente para texto */
         .text-gradient {
             background: linear-gradient(to right, #059669, #2563eb);
@@ -28,7 +28,7 @@
 <body class="min-h-screen relative">
 
     <!-- Background com imagem de doação -->
-    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" 
+    <div class="absolute inset-0 bg-cover bg-center bg-no-repeat"
          style="background-image: url('{{ asset('images/donation-pattern.png') }}');">
 
         <!-- Overlay para melhorar legibilidade -->
@@ -37,7 +37,7 @@
         <!-- Overlay escuro -->
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
     </div>
-        
+
     <!-- Elementos flutuantes animados -->
     <div class="absolute top-1/4 left-1/4 animate-bounce delay-1000 z-10">
         <svg class="w-6 h-6 text-red-400/70" fill="currentColor" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@
     <!-- Conteúdo principal -->
     <div class="relative z-20 min-h-screen flex items-center justify-center px-4 py-12">
         <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 md:p-10 rounded-3xl shadow-2xl max-w-md sm:max-w-lg w-full text-center border border-white/30 mx-auto">
-            
+
             <!-- Logo/Ícone principal -->
              <div class="mb-8 flex justify-center animate-pulse">
                  <div class="relative flex gap-x-4">
@@ -85,6 +85,21 @@
                 Unindo ONGs e doadores para o combate à fome!
             </p>
 
+            @if (session('success'))
+                <div
+                    x-data="{ show: true }"
+                    x-show="show"
+                    x-transition
+                    x-init="setTimeout(() => show = false, 4000)"
+                    class="fixed top-6 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-white text-sm sm:text-base font-semibold px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+            
             <style>
             @keyframes typing {
             from { width: 0 }
@@ -125,9 +140,9 @@
                         </svg>
                         Quero Doar Alimentos
                     </a>
-                    
+
                     <a href="{{ route('pedidodoacao.create') }}" class="w-full group bg-gradient-to-r from-red-500 to-pink-500 text-white py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl hover:from-red-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 font-medium text-sm sm:text-base">
-                        
+
                         <svg class="w-5 h-5 text-white group-hover:-rotate-45 transition-transform" fill="currentColor" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
                             <g stroke-linecap="round" stroke-linejoin="round" stroke= "currentColor" stroke-width="2" transform="translate(1.4066 1.4066) scale(2.81 2.81)">
                                 <path d="M51.456 47.291c-0.256 0-0.512-0.098-0.707-0.293L29.812 26.061c-5.952-5.952-5.952-15.637 0-21.589C32.694 1.588 36.528 0 40.605 0S48.517 1.588 51.4 4.472l0.056 0.056 0.056-0.056C54.395 1.588 58.229 0 62.307 0c4.077 0 7.91 1.588 10.794 4.472l0 0 0 0c5.952 5.952 5.952 15.637 0 21.589L52.163 46.998C51.968 47.193 51.712 47.291 51.456 47.291zM40.605 2c-3.543 0-6.875 1.38-9.38 3.886-5.172 5.172-5.172 13.588 0 18.761l20.23 20.23 20.23-20.23c5.172-5.173 5.172-13.589 0-18.761l0 0C69.181 3.38 65.85 2 62.307 2c-3.544 0-6.875 1.38-9.381 3.886l-0.763 0.763c-0.391 0.391-1.023 0.391-1.414 0l-0.763-0.763C47.48 3.38 44.149 2 40.605 2z"/>
@@ -138,7 +153,7 @@
                         </svg>
                         Solicitar Doação
                     </a>
-                    
+
                     <a href="{{ route('reativar.conta') }}" class="w-full group bg-gradient-to-r from-gray-500 to-gray-600 text-white py-2 sm:py-2.5 px-4 sm:px-6 rounded-xl hover:from-gray-600 hover:to-gray-700 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-xs sm:text-sm font-medium">
                         <svg class="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
