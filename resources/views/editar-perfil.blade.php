@@ -33,13 +33,13 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="nome" class="form-label">Nome da ONG*</label>
-                                    <input type="text" class="form-control" id="nome" name="nome" 
+                                    <input type="text" class="form-control" id="nome" name="nome"
                                         value="{{ old('nome', $ong->nome) }}" required>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="cnpj" class="form-label">CNPJ*</label>
-                                    <input type="text" class="form-control" id="cnpj" name="cnpj" 
+                                    <input type="text" class="form-control" id="cnpj" name="cnpj"
                                         value="{{ old('cnpj', $ong->cnpj) }}" required>
                                 </div>
                             </div>
@@ -47,20 +47,20 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <label for="email" class="form-label">E-mail*</label>
-                                    <input type="email" class="form-control" id="email" name="email" 
+                                    <input type="email" class="form-control" id="email" name="email"
                                         value="{{ old('email', $ong->email) }}" required>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label for="telefone" class="form-label">Telefone*</label>
-                                    <input type="text" class="form-control" id="telefone" name="telefone" 
+                                    <input type="text" class="form-control" id="telefone" name="telefone"
                                         value="{{ old('telefone', $ong->telefone) }}" required>
                                 </div>
                             </div>
 
                             <div class="mb-3">
                                 <label for="endereco" class="form-label">Endereço Completo*</label>
-                                <textarea class="form-control" id="endereco" name="endereco" 
+                                <textarea class="form-control" id="endereco" name="endereco"
                                     rows="3" required>{{ old('endereco', $ong->endereco) }}</textarea>
                             </div>
 
@@ -98,7 +98,7 @@
                                     Cancelar
                                 </a>
                                 <button type="submit" class="btn btn-primary">
-                                    Salvar Alterações
+                                    Salvar Altera��es
                                 </button>
                             </div>
                         </form>
@@ -117,7 +117,7 @@
                                 </button>
                             </form>
                         </div>
-                        
+
                         <div class="mt-5">
                             <h5>Encerrar Conta</h5>
                             <p class="text-muted">Você pode excluir permanentemente sua conta. Esta ação não pode ser desfeita.</p>

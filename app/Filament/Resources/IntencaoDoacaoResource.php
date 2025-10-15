@@ -57,7 +57,7 @@ class IntencaoDoacaoResource extends Resource
 
                 TextColumn::make('quantidade')
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
-                    ->label('Qtd a receber'),
+                    ->label('Qtd da intenção'),
 
                 TextColumn::make('quantidade_recebida')
                     ->formatStateUsing(fn ($state, $record) => $state . ' ' . $record->unidade)
@@ -191,14 +191,13 @@ class IntencaoDoacaoResource extends Resource
                                 // Atualiza status do pedido
                                 if ($totalQuantidadeRecebida < $record->quantidade) {
                                     $record->update(['status' => 'Recebida em parte']);
+                                } else {
+                                    // 3. Atualizar status da intenção
+                                    $record->update([
+                                        'status' => 'Recebida',
+                                        'unidade' => $data['itens_recebidos'][0]['unidade_recebida'], // Usa a unidade do primeiro item
+                                    ]);
                                 }
-
-                                // 3. Atualizar status da intenção
-                                $record->update([
-                                    'status' => 'Recebida',
-                                    'quantidade' => $totalQuantidadeRecebida,
-                                    'unidade' => $data['itens_recebidos'][0]['unidade_recebida'], // Usa a unidade do primeiro item
-                                ]);
 
                                 Notification::make()
                                     ->title('Doação registrada com sucesso!')

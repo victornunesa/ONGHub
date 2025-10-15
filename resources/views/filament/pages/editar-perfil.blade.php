@@ -1,8 +1,16 @@
 @push('styles')
     <style>
-        /* Garante cor laranja no modo escuro */
-        html label,
-        html h3 {
+        /* Corrige cor do texto dentro de inputs e textareas no modo escuro */
+        html.dark input,
+        html.dark textarea,
+        html.dark select {
+            color: #111827 !important; /* text-gray-900 */
+            background-color: #f9fafb !important; /* bg-gray-50 */
+        }
+
+        /* Deixa o texto de label e títulos em laranja */
+        html.dark label,
+        html.dark h3 {
             color: #fb923c !important; /* orange-400 */
         }
     </style>
